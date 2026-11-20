@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude 101 — Hiểu Claude trong 10 phút</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFF8F1; --card:#fff; --ink:#2B2730; --muted:#6E6875; --line:#F0E4D8;
+  --coral:#E9785A; --coral-soft:#FDE6DD; --coral-ink:#B04A2C;
+  --mint:#3FB58F; --mint-soft:#DDF4EC; --mint-ink:#1D7357;
+  --lav:#8C7BE6; --lav-soft:#ECE8FD; --lav-ink:#5A47B8;
+  --sun:#F2B33D; --sun-soft:#FDF1D6; --sun-ink:#94650A;
+  --sky:#4AA3DF; --sky-soft:#DFF0FB; --sky-ink:#1F6A9C;
+  --pink:#E86F9A; --pink-soft:#FCE3EC; --pink-ink:#A83A64;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:"Be Vietnam Pro",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.65;font-size:16.5px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1060px;margin:0 auto;padding:0 20px}
+b,strong{font-weight:700}
+code{font-family:var(--mono);font-size:.88em;background:#F6EDE4;padding:2px 6px;border-radius:6px;color:var(--coral-ink)}
+a{color:var(--coral-ink)}
+
+/* progress + nav */
+#progress{position:fixed;top:0;left:0;height:4px;width:0;background:linear-gradient(90deg,var(--coral),var(--sun),var(--mint));z-index:60;border-radius:0 4px 4px 0}
+.topnav{position:sticky;top:0;z-index:50;background:rgba(255,248,241,.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topnav .wrap{display:flex;gap:8px;overflow-x:auto;padding:10px 20px;scrollbar-width:none}
+.topnav .wrap::-webkit-scrollbar{display:none}
+.topnav a{flex:none;text-decoration:none;color:var(--muted);font-weight:600;font-size:13px;padding:6px 12px;border-radius:999px;background:#fff;border:1px solid var(--line);transition:.2s}
+.topnav a:hover{color:var(--coral-ink);border-color:var(--coral)}
+.topnav a.active{color:#fff;background:var(--coral);border-color:var(--coral)}
+
+/* mascot */
+.m{display:inline-block}
+.m-svg{width:100%;height:auto;display:block;overflow:visible}
+.m-body{animation:bob 3.2s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+.m-eyes{animation:blink 4.6s infinite;transform-box:fill-box;transform-origin:center}
+.m-shadow{animation:shadow 3.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+.m-drop{animation:drip 1.3s ease-in infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
+@keyframes shadow{50%{transform:scaleX(.82);opacity:.6}}
+@keyframes drip{0%{transform:translateY(-4px);opacity:0}30%{opacity:1}100%{transform:translateY(10px);opacity:0}}
+
+/* hero */
+.hero{padding:48px 0 18px}
+.hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:26px;align-items:center}
+.eyebrow{display:inline-flex;gap:8px;align-items:center;background:var(--coral-soft);color:var(--coral-ink);font-weight:700;font-size:13px;padding:6px 12px;border-radius:999px}
+.eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--coral);animation:pulse 1.6s infinite}
+@keyframes pulse{50%{transform:scale(1.6);opacity:.4}}
+h1{font-size:clamp(34px,5.4vw,56px);line-height:1.08;margin:16px 0 14px;letter-spacing:-.02em}
+h1 .hl{background:linear-gradient(110deg,var(--coral),#F2A24E);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:18px;color:var(--muted);max-width:580px;margin:0}
+.hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.pill{font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;background:#fff;border:1px solid var(--line)}
+.hero-stage{position:relative;height:330px}
+.hero-stage .big-m{position:absolute;left:50%;top:54%;width:170px;transform:translate(-50%,-50%)}
+.bubble{position:absolute;background:#fff;border:1.5px solid var(--line);border-radius:18px;padding:10px 14px;font-size:14px;font-weight:600;box-shadow:0 10px 24px rgba(90,60,30,.08)}
+.bubble::after{content:"";position:absolute;bottom:-9px;left:30px;width:16px;height:16px;background:#fff;border-right:1.5px solid var(--line);border-bottom:1.5px solid var(--line);transform:rotate(45deg)}
+.hero-stage .bubble{left:50%;top:0;transform:translateX(-50%);white-space:nowrap;animation:popin .6s .4s both}
+.hero-stage .bubble::after{left:calc(50% - 8px)}
+@media(max-width:420px){.hero-stage .bubble{font-size:13px;white-space:normal;width:max-content;max-width:92%;text-align:center}}
+@keyframes popin{from{opacity:0;transform:translateX(-50%) translateY(10px) scale(.9)}}
+.float-doc{position:absolute;animation:floaty 5s ease-in-out infinite}
+@keyframes floaty{0%,100%{transform:translateY(0) rotate(var(--r,0deg))}50%{transform:translateY(-12px) rotate(calc(var(--r,0deg) * -1))}}
+
+/* doc chip */
+.doc{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:6px 10px 6px 8px;font-size:12.5px;font-weight:700;box-shadow:0 6px 16px rgba(80,50,30,.08);font-family:var(--mono);white-space:nowrap;color:var(--ink)}
+.doc::before{content:"";flex:none;width:13px;height:16px;border-radius:2px;background:var(--c,var(--coral));clip-path:polygon(0 0,68% 0,100% 30%,100% 100%,0 100%)}
+
+/* sections */
+section.sec{padding:60px 0 20px;scroll-margin-top:56px}
+.sec-head{display:flex;gap:16px;align-items:flex-start;margin-bottom:24px}
+.num{flex:none;width:48px;height:48px;border-radius:16px;display:grid;place-items:center;font-weight:800;font-size:20px;color:#fff;background:var(--coral);box-shadow:0 8px 18px rgba(233,120,90,.32);transform:rotate(-6deg)}
+h2{font-size:clamp(25px,3.4vw,34px);margin:0;line-height:1.2;letter-spacing:-.01em}
+h3{font-size:20px;margin:0 0 8px;line-height:1.3}
+h4{font-size:16px;margin:0 0 6px}
+.sec-head p{margin:6px 0 0;color:var(--muted);font-size:17px;max-width:760px}
+.card{background:var(--card);border-radius:22px;border:1px solid var(--line);padding:22px;box-shadow:0 10px 30px rgba(90,60,30,.05)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.stack{display:grid;gap:18px}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+p{margin:0 0 10px}
+ul.clean{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+ul.clean li{position:relative;padding-left:24px}
+ul.clean li::before{content:"";position:absolute;left:4px;top:.62em;width:9px;height:9px;border-radius:3px;background:var(--b,var(--coral));transform:rotate(45deg)}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--mint-soft);color:var(--mint-ink)}
+.tag.coral{background:var(--coral-soft);color:var(--coral-ink)}
+.tag.lav{background:var(--lav-soft);color:var(--lav-ink)}
+.tag.sun{background:var(--sun-soft);color:var(--sun-ink)}
+.tag.sky{background:var(--sky-soft);color:var(--sky-ink)}
+.tag.pink{background:var(--pink-soft);color:var(--pink-ink)}
+.callout{border-radius:18px;padding:16px 20px;background:var(--sun-soft);border:1.5px dashed #E6C46F;display:flex;gap:14px;align-items:flex-start;margin-top:18px}
+.callout .m{width:54px;flex:none}
+.callout p{margin:0}
+.callout.mint{background:var(--mint-soft);border-color:#9ED8C2}
+.callout.coral{background:var(--coral-soft);border-color:#F1B29E}
+@media(max-width:840px){.grid2,.grid3,.hero-grid{grid-template-columns:1fr}.hero-stage{height:290px}}
+.grid2>*,.grid3>*,.hero-grid>*,.mdlive>*,.perm-grid>*,.pl-grid>*,.lane>*{min-width:0}
+body{overflow-x:clip}
+@media(max-width:560px){.quad,.card{padding:16px}.wrap{padding:0 14px}.topnav .wrap{padding:10px 14px}}
+
+/* reveal */
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+
+/* code block */
+.code{background:#2B2730;color:#F3EDE6;border-radius:16px;overflow:hidden;font-family:var(--mono);font-size:13px;line-height:1.6;box-shadow:0 10px 24px rgba(43,39,48,.16)}
+.code .bar{display:flex;align-items:center;gap:6px;padding:9px 14px;background:#38333F;font-size:12px;color:#C8BFD2}
+.code .bar i{width:10px;height:10px;border-radius:50%;background:#FF7B72;display:inline-block}
+.code .bar i:nth-child(2){background:#F2C14E}.code .bar i:nth-child(3){background:#5CD08F}
+.code .bar span{margin-left:8px}
+.code pre{margin:0;padding:14px 16px;white-space:pre-wrap;word-break:break-word;font-family:inherit}
+.t-dash{color:#8C8496}.t-key{color:#7FD1B9}.t-h{color:#FFB38A;font-weight:700}.t-li{color:#F2C14E}.t-c{color:#C9B8FF}.t-strong{color:#fff;font-weight:700}.t-note{color:#8C8496;font-style:italic}
+
+/* ===== S1: wake-up & bike ===== */
+.wake{position:relative;height:190px;background:linear-gradient(180deg,#EEF0FF,#FFF4EA);border-radius:18px;overflow:hidden}
+.wake .m{position:absolute;width:104px;left:28%;bottom:26px}
+.wake .w-sleep{animation:wSleep 9s infinite}
+.wake .w-awake{animation:wAwake 9s infinite}
+@keyframes wSleep{0%,46%{opacity:1}50%,96%{opacity:0}100%{opacity:1}}
+@keyframes wAwake{0%,46%{opacity:0}50%,96%{opacity:1}100%{opacity:0}}
+.wake .z{position:absolute;left:calc(28% + 90px);bottom:120px;font-weight:800;color:var(--lav);font-size:20px;opacity:0;animation:zz 3s infinite}
+.wake .z:nth-of-type(2){animation-delay:1s;font-size:16px}
+.wake .z:nth-of-type(3){animation-delay:2s;font-size:13px}
+@keyframes zz{0%{opacity:0;transform:translate(0,0)}20%{opacity:1}100%{opacity:0;transform:translate(24px,-46px)}}
+.wake .zwrap{animation:wSleep 9s infinite}
+.wake .note{position:absolute;right:8%;bottom:40px;animation:noteIn 9s infinite}
+@keyframes noteIn{0%,30%{transform:translateX(160%) rotate(10deg);opacity:0}42%,92%{transform:translateX(0) rotate(-4deg);opacity:1}100%{opacity:0}}
+.wake .bang{position:absolute;left:calc(28% + 86px);bottom:132px;background:var(--coral);color:#fff;font-weight:800;border-radius:12px;padding:2px 10px;font-size:13px;animation:wAwake 9s infinite}
+.wake .cap{position:absolute;left:14px;top:12px;font-size:12.5px;font-weight:700;color:var(--muted);background:rgba(255,255,255,.75);padding:3px 10px;border-radius:999px}
+.wake .cap.c2{animation:wAwake 9s infinite}
+.wake .cap.c1{animation:wSleep 9s infinite}
+
+.bike-scene{width:100%;height:auto;display:block;border-radius:18px}
+.bike{animation:ride 10s linear infinite}
+@keyframes ride{from{transform:translateX(-80px)}to{transform:translateX(640px)}}
+.spin{animation:spin .7s linear infinite;transform-box:fill-box;transform-origin:center}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sign{transform-box:fill-box;transform-origin:50% 100%}
+.sign.s1{animation:sg1 10s infinite}.sign.s2{animation:sg2 10s infinite}.sign.s3{animation:sg3 10s infinite}
+@keyframes sg1{0%,30%,40%,100%{transform:scale(1)}34%{transform:scale(1.18)}}
+@keyframes sg2{0%,54%,64%,100%{transform:scale(1)}58%{transform:scale(1.18)}}
+@keyframes sg3{0%,78%,88%,100%{transform:scale(1)}82%{transform:scale(1.18)}}
+.cloud{animation:drift 30s linear infinite}
+@keyframes drift{from{transform:translateX(-40px)}to{transform:translateX(60px)}}
+
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.vs .box{border-radius:16px;padding:14px 16px}
+.vs .yes{background:var(--mint-soft)}
+.vs .no{background:var(--coral-soft)}
+@media(max-width:560px){.vs{grid-template-columns:1fr}}
+
+/* ===== S2: markdown typing ===== */
+.mdlive{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:stretch}
+@media(max-width:760px){.mdlive{grid-template-columns:1fr}}
+.mdlive .lbl{font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.typer{min-height:230px}
+.typer pre::after{content:"";display:inline-block;width:8px;height:16px;background:var(--sun);vertical-align:-3px;margin-left:1px;animation:caret 1s steps(1) infinite}
+@keyframes caret{50%{opacity:0}}
+.rendered{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:16px 20px;min-height:230px;box-shadow:0 10px 24px rgba(90,60,30,.05)}
+.rendered h3{font-size:22px;margin:0 0 8px}
+.rendered h4{font-size:17px;margin:12px 0 6px;color:var(--coral-ink)}
+.rendered p{margin:0 0 6px}
+.rendered ul{margin:0;padding-left:20px}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:16px}
+.legend div{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:14px}
+.legend code{font-weight:700}
+.jar{display:flex;gap:16px;align-items:center}
+.jar svg{width:96px;flex:none}
+.jar-lid{animation:lid 4s ease-in-out infinite;transform-box:fill-box;transform-origin:0% 100%}
+@keyframes lid{0%,60%,100%{transform:rotate(0)}70%,85%{transform:rotate(-24deg) translateY(-4px)}}
+
+/* ===== S3: tree + lanes ===== */
+.tree{font-family:var(--mono);font-size:13.5px;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:16px 18px;line-height:1.9;overflow-x:auto}
+.tree div{white-space:pre;opacity:0;transform:translateX(-10px);transition:.45s}
+.tree.in div{opacity:1;transform:none}
+.tree .cm{color:var(--muted);font-style:italic}
+.tree .f-claude{color:var(--coral-ink);font-weight:700}
+.tree .f-rule{color:var(--sun-ink);font-weight:700}
+.tree .f-skill{color:var(--mint-ink);font-weight:700}
+.tree .f-agent{color:var(--lav-ink);font-weight:700}
+.lanes{display:grid;gap:12px}
+.lane{display:grid;grid-template-columns:200px 1fr 64px;gap:14px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px 14px}
+.lane .info h4{margin:0 0 2px;font-size:15px}
+.lane .info p{margin:0;font-size:13px;color:var(--muted);line-height:1.45}
+.track{position:relative;height:48px;border-radius:999px;background:repeating-linear-gradient(90deg,#F4EBE2 0 10px,transparent 10px 18px);background-size:100% 3px;background-repeat:no-repeat;background-position:0 50%}
+.track .tok{position:absolute;top:50%;left:0;transform:translateY(-50%);opacity:0}
+.lane .m{width:58px}
+.l1 .tok{animation:fly1 7s infinite}
+.l1 .tok.t2{animation-delay:.35s}
+@keyframes fly1{0%{left:0;opacity:0}5%{opacity:1}30%{left:calc(100% - 96px);opacity:1}36%,100%{left:calc(100% - 60px);opacity:0}}
+.l2 .tok.lab{animation:fly1 7s infinite}
+.l2 .tok.full{animation:fly2 7s infinite}
+@keyframes fly2{0%,48%{left:0;opacity:0}53%{opacity:1}78%{left:calc(100% - 110px);opacity:1}84%,100%{left:calc(100% - 70px);opacity:0}}
+.l2 .hit{position:absolute;left:0;top:-6px;font-size:11px;font-weight:800;color:var(--mint-ink);background:var(--mint-soft);border-radius:999px;padding:1px 8px;opacity:0;animation:hit 7s infinite}
+@keyframes hit{0%,44%{opacity:0;transform:translateY(4px)}48%,60%{opacity:1;transform:none}66%,100%{opacity:0}}
+.l3 .tok.full{animation:fly2 7s infinite}
+.l3 .ask{position:absolute;left:0;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:12px;font-weight:700;background:var(--sky-soft);color:var(--sky-ink);border-radius:10px;padding:5px 9px;opacity:0;animation:hit 7s infinite}
+@media(max-width:700px){.lane{grid-template-columns:1fr 56px}.lane .info{grid-column:1/-1}}
+
+/* ===== S4: quad cards ===== */
+.quad{background:#fff;border:1px solid var(--line);border-top:6px solid var(--q);border-radius:24px;padding:22px;margin-bottom:22px;box-shadow:0 10px 30px rgba(90,60,30,.05)}
+.q-head{display:flex;gap:16px;align-items:center;margin-bottom:16px}
+.q-ico{flex:none;width:54px;height:66px;background:var(--qs);display:grid;place-items:center;font-family:var(--mono);font-weight:800;color:var(--qi);font-size:13px;clip-path:polygon(0 0,70% 0,100% 22%,100% 100%,0 100%);border-radius:6px;animation:wiggle 4s ease-in-out infinite}
+@keyframes wiggle{0%,80%,100%{transform:rotate(0)}85%{transform:rotate(-7deg)}90%{transform:rotate(6deg)}95%{transform:rotate(-3deg)}}
+.q-head h3{margin:4px 0 2px;font-size:22px}
+.q-head p{margin:0;color:var(--muted)}
+.facts{display:grid;gap:10px;align-content:start}
+.fact{display:grid;grid-template-columns:118px 1fr;gap:12px;align-items:start;padding:10px 12px;background:#FFFBF7;border-radius:14px;border:1px solid var(--line)}
+.fact .k{font-size:12.5px;font-weight:700;color:var(--qi);padding-top:2px}
+.fact p{margin:0;font-size:15px}
+@media(max-width:560px){.fact{grid-template-columns:1fr;gap:2px}}
+
+.zones{position:relative;display:grid;grid-template-columns:repeat(3,1fr);height:150px;border-radius:16px;overflow:hidden;margin-bottom:12px;border:1px solid var(--line)}
+.zone{display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--muted)}
+.zone:nth-of-type(1){background:#F7F3EE}.zone:nth-of-type(2){background:#FFF1CF}.zone:nth-of-type(3){background:#EEF6FB}
+.walker{position:absolute;bottom:30px;width:50px;left:2%;animation:walk 9s linear infinite}
+.walker .m-body{animation-duration:.55s}
+@keyframes walk{0%{left:2%}90%,100%{left:86%}}
+.gsign{position:absolute;left:10px;top:10px;font-size:11.5px;font-weight:700;background:#fff;border:1px solid var(--line);border-radius:999px;padding:3px 9px;z-index:2}
+.zsign{position:absolute;left:50%;top:38px;background:var(--sun);color:#fff;font-weight:700;font-size:12.5px;padding:6px 10px;border-radius:10px;white-space:nowrap;box-shadow:0 6px 14px rgba(242,179,61,.4);opacity:0;transform:translateX(-50%) scale(.6);animation:zsign 9s infinite}
+@keyframes zsign{0%,28%{opacity:0;transform:translateX(-50%) scale(.6)}32%,60%{opacity:1;transform:translateX(-50%) scale(1)}64%,100%{opacity:0;transform:translateX(-50%) scale(.6)}}
+
+.req-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px}
+.btn{font:inherit;font-size:13.5px;font-weight:600;border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;cursor:pointer;transition:transform .2s,background .2s,border-color .2s,color .2s;color:var(--ink)}
+.btn:hover{border-color:var(--coral);color:var(--coral-ink);transform:translateY(-1px)}
+.btn:disabled{opacity:.5;cursor:default;transform:none}
+.btn.on,.btn.primary{background:var(--coral);border-color:var(--coral);color:#fff}
+.btn.primary:hover{background:#D9674A;color:#fff}
+.btn code{background:rgba(0,0,0,.06);color:inherit}
+.shelf-stage{display:grid;grid-template-columns:190px 1fr;gap:16px;align-items:end}
+.shelf-m{text-align:center}
+.shelf-m .m{width:92px}
+.think{font-size:12.5px;font-weight:600;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:6px 10px;margin-bottom:8px;min-height:48px;display:flex;align-items:center;justify-content:center;line-height:1.35}
+.shelf{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:18px 12px 0;border-bottom:12px solid #C99E78;border-radius:4px}
+.book{background:#fff;border:1.5px solid var(--line);border-left:10px solid var(--bk);border-radius:8px;padding:10px 10px 12px;min-height:118px;display:flex;flex-direction:column;gap:6px;transition:transform .5s cubic-bezier(.3,1.6,.5,1),opacity .3s,box-shadow .3s}
+.book b{font-family:var(--mono);font-size:12.5px}
+.book span{font-size:12.5px;color:var(--muted);line-height:1.4}
+.shelf.choosing .book{opacity:.4}
+.shelf.scan .book{animation:scan .7s ease}
+.shelf.scan .book:nth-child(2){animation-delay:.12s}.shelf.scan .book:nth-child(3){animation-delay:.24s}.shelf.scan .book:nth-child(4){animation-delay:.36s}
+@keyframes scan{50%{transform:translateY(-6px)}}
+.book.pick{opacity:1!important;transform:translateY(-18px) rotate(-2deg);box-shadow:0 14px 28px rgba(63,181,143,.35)}
+.opened{margin-top:16px;border-radius:16px;background:var(--mint-soft);padding:14px 16px;display:none}
+.opened.show{display:block;animation:fadeup .45s}
+.opened.none{background:var(--sky-soft)}
+.opened ol{margin:6px 0 0;padding-left:22px}
+.opened li{opacity:0;animation:fadeup .4s forwards}
+@keyframes fadeup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(max-width:700px){.shelf-stage{grid-template-columns:1fr}.shelf{grid-template-columns:repeat(2,1fr)}.shelf-m{display:flex;gap:10px;align-items:center;flex-direction:row-reverse}.shelf-m .m{width:60px;flex:none}.think{flex:1;margin:0}}
+
+.dispatch{position:relative;display:grid;grid-template-columns:1fr 1.3fr;gap:16px;align-items:center;background:linear-gradient(180deg,#F5F2FF,#FFF8F1);border-radius:18px;padding:16px}
+.boss{text-align:center}
+.boss .m{width:88px}
+.desk-mini{margin-top:8px;background:#fff;border:1.5px dashed #D3C9F3;border-radius:12px;padding:8px;min-height:70px;font-size:12px;text-align:left}
+.desk-mini>span{display:block;color:var(--muted);font-weight:700;margin-bottom:4px}
+.pile{display:flex;flex-direction:column;gap:4px}
+.pile .chip{font-size:12px;font-weight:600;background:var(--lav-soft);color:var(--lav-ink);border-radius:8px;padding:3px 8px;animation:fadeup .4s}
+.rooms{display:grid;gap:12px}
+.room{border:2px dashed var(--rc);border-radius:16px;padding:8px 12px 10px;display:grid;grid-template-columns:52px 1fr;gap:4px 10px;align-items:center;background:rgba(255,255,255,.75)}
+.room .m{width:50px}
+.room-lbl{grid-column:1/-1;font-size:12px;font-weight:700;color:var(--muted);font-family:var(--mono)}
+.room-work{display:flex;align-items:center;gap:8px;min-height:34px}
+.room-pile{display:flex;flex-wrap:wrap;gap:4px}
+.room-pile i{width:16px;height:20px;background:#fff;border:1.5px solid #E2D6CA;border-radius:3px;animation:drop .35s both}
+.busy{display:none;gap:4px}
+.room.working .busy{display:inline-flex}
+.busy i{width:6px;height:6px;border-radius:50%;background:var(--rc);animation:dots 1s infinite}
+.busy i:nth-child(2){animation-delay:.15s}.busy i:nth-child(3){animation-delay:.3s}
+@keyframes dots{50%{transform:translateY(-5px);opacity:.4}}
+.fly{position:absolute;z-index:5;pointer-events:none;left:0;top:0}
+.dispatch-foot{display:flex;gap:12px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.status{font-size:14px;font-weight:600;color:var(--muted)}
+@media(max-width:700px){.dispatch{grid-template-columns:1fr}.boss{display:grid;grid-template-columns:70px 1fr;gap:10px;align-items:center}.boss .m{width:64px}.desk-mini{margin:0}}
+.mini h4{font-size:17px}
+
+/* ===== S4b: extras ===== */
+.layers{display:grid;gap:8px;margin-top:10px}
+.layer{border-radius:14px;padding:9px 14px;display:flex;flex-direction:column;gap:1px;position:relative;opacity:0;transform:translateY(-12px)}
+.layer b{font-size:14px}.layer span{font-size:13px;color:var(--muted)}
+.layer code{font-size:12px;background:rgba(255,255,255,.7)}
+.l-org{background:#EFEAE5}.l-user{background:var(--sky-soft);margin-left:14px}.l-proj{background:var(--coral-soft);margin-left:28px}.l-local{background:var(--lav-soft);margin-left:42px}
+.reveal.in .layer{animation:layerIn .55s cubic-bezier(.3,1.4,.5,1) forwards}
+.reveal.in .layer:nth-child(2){animation-delay:.25s}.reveal.in .layer:nth-child(3){animation-delay:.5s}.reveal.in .layer:nth-child(4){animation-delay:.75s}
+@keyframes layerIn{to{opacity:1;transform:none}}
+@media(max-width:560px){.l-user,.l-proj,.l-local{margin-left:0}}
+
+.memo-scene{position:relative;display:grid;grid-template-columns:90px 1fr;gap:12px;align-items:end;background:linear-gradient(180deg,#FFF0F5,#FFF8F1);border-radius:18px;padding:52px 14px 14px;margin-top:10px}
+.memo-scene .m{width:84px}
+.say-user{position:absolute;top:10px;right:14px;background:var(--sky);color:#fff;font-size:13px;font-weight:600;padding:6px 12px;border-radius:14px 14px 4px 14px;animation:sayU 9s infinite}
+@keyframes sayU{0%,4%{opacity:0;transform:translateY(8px)}10%,90%{opacity:1;transform:none}96%,100%{opacity:0}}
+.notebook{background:#fff;border-radius:10px;border:1.5px solid var(--line);box-shadow:0 8px 18px rgba(90,60,30,.07);padding:0 12px 10px 26px;position:relative;background-image:repeating-linear-gradient(180deg,transparent 0 27px,#F3E6EC 27px 28px);background-position:0 34px}
+.notebook::before{content:"";position:absolute;left:14px;top:0;bottom:0;width:2px;background:#F7B9CF}
+.nb-head{font-family:var(--mono);font-size:12px;font-weight:800;color:var(--pink-ink);padding:8px 0 4px;height:34px}
+.nb-line{font-family:var(--mono);font-size:12.5px;line-height:28px;white-space:nowrap;position:relative}
+.nb-line.new{color:var(--pink-ink);font-weight:700;clip-path:inset(0 100% 0 0);animation:write 9s infinite}
+@keyframes write{0%,22%{clip-path:inset(0 100% 0 0)}50%,94%{clip-path:inset(0 -40px 0 0)}100%{clip-path:inset(0 100% 0 0)}}
+.pencil{position:absolute;width:24px;height:24px;top:-12px;left:0;animation:pencil 9s infinite}
+@media(max-width:560px){.memo-scene{grid-template-columns:1fr;padding-top:48px}.memo-scene .m{width:54px}.nb-line{font-size:11.5px}}
+.notebook{min-width:0;overflow:hidden}
+@keyframes pencil{0%,22%{left:0;opacity:1}50%{left:calc(100% - 4px);opacity:1}56%,100%{left:calc(100% - 4px);opacity:0}}
+
+.perm-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;align-items:stretch}
+@media(max-width:760px){.perm-grid{grid-template-columns:1fr}}
+.perm-table{display:grid;gap:8px}
+.prow{display:grid;grid-template-columns:1fr 210px;gap:10px;align-items:center;background:#FFFBF7;border:1px solid var(--line);border-radius:14px;padding:9px 12px;font-size:14.5px}
+.prow .st{justify-self:start;font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:999px;transition:background .3s,color .3s;animation:fadeup .35s}
+.st.auto{background:var(--mint-soft);color:var(--mint-ink)}
+.st.ask{background:var(--sun-soft);color:var(--sun-ink)}
+.st.no{background:#EFE9E4;color:#7A6F68}
+.st.guard{background:var(--sky-soft);color:var(--sky-ink)}
+@media(max-width:480px){.prow{grid-template-columns:1fr}}
+.perm-note{background:var(--sky-soft);border-radius:16px;padding:14px 16px;display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:start}
+.perm-note .m{width:62px}
+.perm-note h4{margin:2px 0 4px}
+.perm-note p{margin:0 0 6px;font-size:14.5px}
+
+.mini .ico{width:44px;height:44px;display:block;margin-bottom:8px}
+.mini h4{font-size:17px;margin:8px 0 6px}
+.hand{transform-box:view-box;transform-origin:22px 22px;animation:rev 2.4s linear infinite}
+@keyframes rev{to{transform:rotate(-360deg)}}
+.beam{animation:beam 1.2s steps(2) infinite}
+@keyframes beam{50%{opacity:.15}}
+.plug{animation:plug 2.4s ease-in-out infinite}
+@keyframes plug{0%,100%{transform:translateX(-4px)}45%,60%{transform:translateX(3px)}}
+.lid{transform-box:fill-box;transform-origin:0% 100%;animation:lid 3s ease-in-out infinite}
+.d1,.d2,.d3{animation:dots 1.2s infinite}.d2{animation-delay:.2s}.d3{animation-delay:.4s}
+.brain{transform-box:fill-box;transform-origin:center;animation:think 2s ease-in-out infinite}
+@keyframes think{50%{transform:scale(1.12)}}
+.cmds{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.cmd{display:flex;gap:10px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:13.5px;transition:transform .2s,border-color .2s}
+.cmd:hover{transform:translateY(-2px);border-color:var(--coral)}
+.cmd code{flex:none;font-weight:700;min-width:84px;text-align:center}
+
+/* ===== S5: player ===== */
+.pl-grid{display:grid;grid-template-columns:290px 1fr;gap:22px}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:4px;counter-reset:st;align-content:start}
+.steps li{display:flex;gap:10px;align-items:center;padding:7px 10px;border-radius:12px;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;transition:background .25s,color .25s}
+.steps li::before{counter-increment:st;content:counter(st);flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12px;background:#F4EBE2;color:var(--muted);transition:.25s}
+.steps li:hover{background:#FFF4EC}
+.steps li.done{color:var(--ink)}
+.steps li.done::before{background:var(--mint);color:#fff}
+.steps li.cur{background:var(--lav-soft);color:var(--lav-ink)}
+.steps li.cur::before{background:var(--lav);color:#fff;transform:scale(1.1)}
+.pl-now{display:flex;gap:14px;align-items:flex-start;min-height:132px}
+.pl-now .m{width:78px;flex:none}
+.pl-now h3{margin:8px 0 4px}
+.pl-now p{margin:0;color:var(--muted)}
+.pl-anim{animation:fadeup .45s}
+.desk{margin-top:10px;background:#FFFBF7;border:1.5px solid var(--line);border-radius:16px;padding:12px 14px}
+.desk-head{display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:8px}
+.meter{height:12px;border-radius:999px;background:#F2E8DE;overflow:hidden}
+.meter i{display:block;height:100%;width:0;border-radius:999px;background:var(--mint);transition:width .6s cubic-bezier(.3,1.3,.5,1),background .4s}
+.meter i.warn{background:var(--sun)}
+.meter i.hot{background:var(--coral)}
+.desk-items{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;min-height:36px}
+.desk-items .doc{font-size:11.5px;padding:4px 8px 4px 6px;box-shadow:none}
+.desk-items .doc.new{animation:drop .5s cubic-bezier(.3,1.5,.5,1)}
+.desk-items .empty{font-size:13px;color:var(--muted);font-style:italic}
+@keyframes drop{from{opacity:0;transform:translateY(-16px) scale(.8)}}
+.pl-ctrl{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+@media(max-width:840px){.pl-grid{grid-template-columns:1fr}.steps{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}}
+
+/* ===== S6: context desk ===== */
+.ctx{display:grid;grid-template-columns:112px 1fr;gap:12px 14px;align-items:end;margin-top:8px}
+.ctx-m{text-align:center}
+.ctx-m .m{width:88px}
+.ctx-say{font-size:12px;font-weight:700;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:6px 8px;margin-bottom:6px;line-height:1.35;min-height:46px;display:flex;align-items:center;justify-content:center}
+.ctx-desk{position:relative;height:150px;background:linear-gradient(180deg,#F7E6D4,#EED4B8);border-radius:14px 14px 6px 6px;border-bottom:10px solid #C99E78;overflow:hidden}
+.paper{position:absolute;width:42px;height:54px;background:#fff;border:1.5px solid #EADCCD;border-radius:4px;box-shadow:0 3px 6px rgba(0,0,0,.08);animation:drop .45s cubic-bezier(.3,1.5,.5,1) both}
+.paper::before{content:"";position:absolute;left:7px;right:7px;top:12px;height:24px;background:repeating-linear-gradient(180deg,#E7DDD3 0 2px,transparent 2px 7px)}
+.paper.p-md{border-top:5px solid var(--coral)}
+.paper.p-chat{border-top:5px solid var(--sky);width:36px;height:40px}
+.paper.p-sum{border-top:5px solid var(--mint);width:58px}
+.ctx-meter{grid-column:1/-1;display:flex;gap:10px;align-items:center;font-size:14px}
+.ctx-meter .meter{flex:1}
+.ctx-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+
+/* ===== S7 ===== */
+.table-wrap{overflow-x:auto;padding:8px}
+table.cmp{width:100%;border-collapse:collapse;font-size:14.5px;min-width:680px}
+.cmp th{text-align:left;font-size:12.5px;color:var(--muted);font-weight:700;padding:10px 12px;border-bottom:2px solid var(--line)}
+.cmp td{padding:12px;border-bottom:1px solid var(--line);vertical-align:top}
+.cmp tr:last-child td{border-bottom:0}
+.cmp tbody tr{transition:background .2s}
+.cmp tbody tr:hover{background:#FFF6EE}
+.decide{display:grid;gap:10px;margin-top:18px}
+.dq{display:grid;grid-template-columns:1fr 36px 220px;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 16px}
+.dq .arrow{width:28px;height:28px;display:grid;place-items:center;border-radius:50%;background:var(--coral-soft);color:var(--coral-ink);font-weight:800}
+.dq.in .arrow{animation:nudge 1.6s ease-in-out infinite}
+.dq .tag{justify-self:start}
+@keyframes nudge{50%{transform:translateX(5px)}}
+@media(max-width:600px){.dq{grid-template-columns:1fr}.dq .arrow{display:none}}
+
+/* ===== S8 ===== */
+.prompt{border-radius:18px;padding:18px 18px 16px;position:relative}
+.prompt.bad{background:#F7F1EC;border:1.5px dashed #DCCBBB}
+.prompt.good{background:#fff;border:1.5px solid var(--line);box-shadow:0 10px 24px rgba(90,60,30,.06)}
+.prompt .lbl{position:absolute;top:-11px;left:16px;font-size:12px;font-weight:800;padding:2px 10px;border-radius:999px;background:#9A8F86;color:#fff}
+.prompt.good .lbl{background:var(--mint)}
+.prompt p{font-size:16px;margin:4px 0 10px;line-height:1.8}
+mark{color:inherit;padding:1px 3px;border-radius:5px;background-repeat:no-repeat;background-size:0% 100%;background-color:transparent;transition:background-size .7s ease;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.h1{--hc:#FCD9CC}.h2{--hc:#FBE6B3}.h3{--hc:#C8EEDF}.h4{--hc:#CDE7F8}.h5{--hc:#DCD5FB}.h6{--hc:#F6D3E6}
+mark{background-image:linear-gradient(var(--hc),var(--hc))}
+.prompt.in mark{background-size:100% 100%}
+.prompt.in mark.h2{transition-delay:.5s}.prompt.in mark.h3{transition-delay:1s}.prompt.in mark.h4{transition-delay:1.5s}.prompt.in mark.h5{transition-delay:2s}.prompt.in mark.h6{transition-delay:2.5s}
+.mk-legend{display:flex;flex-wrap:wrap;gap:6px}
+.mk-legend span{font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--hc)}
+ol.tips{margin:8px 0 0;padding:0;list-style:none;counter-reset:tp;display:grid;gap:12px}
+ol.tips li{counter-increment:tp;display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start}
+ol.tips li::before{content:counter(tp);width:28px;height:28px;border-radius:10px;background:var(--sun-soft);color:var(--sun-ink);font-weight:800;display:grid;place-items:center;font-size:14px}
+
+/* ===== S9 ===== */
+.gloss{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.term{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;transition:transform .2s,box-shadow .2s,opacity .7s}
+.term:hover{transform:translateY(-3px);box-shadow:0 10px 20px rgba(90,60,30,.08)}
+.term b{display:block;font-size:15px;margin-bottom:2px}
+.term span{font-size:14px;color:var(--muted);line-height:1.5}
+
+/* ===== S10 ===== */
+.flips{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.flip{all:unset;box-sizing:border-box;display:block;cursor:pointer;perspective:1000px;height:220px}
+.flip:focus-visible{outline:3px solid var(--coral);outline-offset:3px;border-radius:20px}
+.flip .inner{position:relative;width:100%;height:100%;transition:transform .7s cubic-bezier(.3,1.3,.5,1);transform-style:preserve-3d}
+.flip.on .inner{transform:rotateY(180deg)}
+.flip:hover:not(.on) .inner{transform:rotateY(8deg)}
+.flip .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:8px}
+.flip .front{background:#fff;border:1.5px solid var(--line);box-shadow:0 8px 20px rgba(90,60,30,.06)}
+.flip .back{background:var(--mint-soft);transform:rotateY(180deg);border:1.5px solid #A8DCC7;justify-content:center}
+.flip .qn{font-size:12px;font-weight:800;color:var(--coral-ink)}
+.flip .front p{font-weight:700;font-size:16px;margin:0;line-height:1.45}
+.flip .back p{margin:0;font-size:14.5px;line-height:1.6}
+.flip .hint{margin-top:auto;font-size:12px;color:var(--muted);font-weight:600}
+
+/* ===== outro ===== */
+.outro{margin:64px 0 50px;background:linear-gradient(135deg,#FDE6DD,#FDF1D6 50%,#DDF4EC);border-radius:28px;padding:30px;display:grid;grid-template-columns:150px 1fr;gap:26px;align-items:center}
+.outro-m{position:relative}
+.outro .m{width:130px}
+.heart{position:absolute;top:10px;left:60%;color:var(--coral);font-size:18px;opacity:0;animation:heart 3s ease-out infinite}
+.heart:nth-of-type(2){animation-delay:1s;left:30%;font-size:14px}
+.heart:nth-of-type(3){animation-delay:2s;left:75%;font-size:12px}
+@keyframes heart{0%{opacity:0;transform:translateY(10px) scale(.6)}20%{opacity:1}100%{opacity:0;transform:translateY(-50px) scale(1.1)}}
+.recap{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+.recap div{background:rgba(255,255,255,.85);border-radius:14px;padding:10px 12px;font-size:14.5px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+@media(max-width:700px){.outro{grid-template-columns:1fr;text-align:center;padding:24px}.outro .m{width:100px;margin:0 auto}.outro-m{width:100px;margin:0 auto}.recap{grid-template-columns:1fr;text-align:left}}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  .reveal{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<nav class="topnav" aria-label="Mục lục">
+  <div class="wrap">
+    <a href="#s1">1 · Claude là ai</a>
+    <a href="#s6">2 · Cái bàn làm việc</a>
+    <a href="#s2">3 · File .md</a>
+    <a href="#s3">4 · Claude đọc file</a>
+    <a href="#s4">5 · Bộ tứ</a>
+    <a href="#s4b">6 · Đồ nghề mở rộng</a>
+    <a href="#s5">7 · Một phiên làm việc</a>
+    <a href="#s7">8 · So sánh nhanh</a>
+    <a href="#s8">9 · Giao việc</a>
+    <a href="#s9">10 · Từ điển</a>
+    <a href="#s10">11 · Thử tài</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow"><span class="dot"></span>Dành cho bạn không làm kỹ thuật</span>
+      <h1>Claude 101 —<br><span class="hl">hiểu Claude trong 10 phút</span></h1>
+      <p class="lead">Claude làm việc thế nào, file <code>.md</code> là gì, và bộ tứ <b>CLAUDE.md · Rules · Skills · Agents</b> phối hợp ra sao, cùng Memory và các "đồ nghề" khác — giải thích bằng ví dụ đời thường, không cần biết code.</p>
+      <div class="hero-meta">
+        <span class="pill">11 phần ngắn</span>
+        <span class="pill">Có minh họa động</span>
+        <span class="pill">Có trò chơi nhỏ ở cuối</span>
+      </div>
+    </div>
+    <div class="hero-stage" aria-hidden="true">
+      <div class="bubble">Chào bạn! Mình dẫn bạn đi một vòng nhé</div>
+      <div class="m big-m" data-m="happy"></div>
+      <span class="float-doc doc" style="--c:var(--coral);left:2%;top:30%;--r:-6deg">CLAUDE.md</span>
+      <span class="float-doc doc" style="--c:var(--sun);right:0;top:26%;--r:5deg;animation-delay:-1.4s">rules/</span>
+      <span class="float-doc doc" style="--c:var(--mint);left:6%;bottom:12%;--r:4deg;animation-delay:-2.6s">SKILL.md</span>
+      <span class="float-doc doc" style="--c:var(--lav);right:4%;bottom:16%;--r:-4deg;animation-delay:-3.6s">agents/</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+<!-- ================= S1 ================= -->
+<section class="sec" id="s1">
+  <div class="sec-head reveal">
+    <div class="num">1</div>
+    <div>
+      <h2>Claude là ai?</h2>
+      <p>Một đồng nghiệp mới cực giỏi — đã "đọc" cả một thư viện khổng lồ. Nhưng có một đặc điểm: <b>mỗi lần mở cuộc trò chuyện mới, bạn ấy bắt đầu lại từ con số 0</b>.</p>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card reveal">
+      <h3>Ví dụ đạp xe</h3>
+      <p>Bạn biết đạp xe nhờ luyện tập rất lâu — giờ thăng bằng đã thành phản xạ. Claude cũng vậy: khả năng đọc, viết, lập luận, viết code có được nhờ một quá trình <b>huấn luyện</b> rất dài trước khi đến tay bạn.</p>
+      <p>Nhưng <b>biết đạp xe ≠ biết đường</b>. Đến một thành phố lạ, bạn vẫn cần bản đồ và biển báo. Với Claude, "bản đồ và biển báo" của dự án chính là các <b>file .md</b>.</p>
+      <svg class="bike-scene" viewBox="0 0 640 190" role="img" aria-label="Minh họa: Claude đạp xe qua các biển báo CLAUDE.md, Rules, Skills để về đích">
+        <rect width="640" height="190" rx="18" fill="#E6F4FC"/>
+        <g class="cloud"><ellipse cx="110" cy="38" rx="34" ry="12" fill="#fff"/><ellipse cx="130" cy="30" rx="20" ry="12" fill="#fff"/></g>
+        <g class="cloud" style="animation-duration:40s"><ellipse cx="430" cy="30" rx="30" ry="10" fill="#fff"/><ellipse cx="448" cy="23" rx="16" ry="10" fill="#fff"/></g>
+        <path d="M0 132 C 90 92 170 110 250 120 C 340 132 420 88 520 104 C 580 112 620 118 640 120 V190 H0Z" fill="#CBEBD9"/>
+        <rect y="138" width="640" height="34" fill="#5E5866"/>
+        <line x1="0" y1="155" x2="640" y2="155" stroke="#fff" stroke-width="3" stroke-dasharray="16 14" opacity=".7"/>
+        <g class="sign s1"><line x1="170" y1="138" x2="170" y2="96" stroke="#7A6F68" stroke-width="4"/><rect x="118" y="70" width="104" height="30" rx="9" fill="#E9785A"/><text x="170" y="90" text-anchor="middle" font-size="14" font-weight="700" fill="#fff" font-family="ui-monospace,Menlo,monospace">CLAUDE.md</text></g>
+        <g class="sign s2"><line x1="330" y1="138" x2="330" y2="96" stroke="#7A6F68" stroke-width="4"/><rect x="290" y="70" width="80" height="30" rx="9" fill="#F2B33D"/><text x="330" y="90" text-anchor="middle" font-size="14" font-weight="700" fill="#fff" font-family="ui-monospace,Menlo,monospace">Rules</text></g>
+        <g class="sign s3"><line x1="490" y1="138" x2="490" y2="96" stroke="#7A6F68" stroke-width="4"/><rect x="450" y="70" width="80" height="30" rx="9" fill="#3FB58F"/><text x="490" y="90" text-anchor="middle" font-size="14" font-weight="700" fill="#fff" font-family="ui-monospace,Menlo,monospace">Skills</text></g>
+        <g><line x1="606" y1="138" x2="606" y2="64" stroke="#7A6F68" stroke-width="4"/><path d="M608 64 L640 74 L608 86Z" fill="#8C7BE6"/></g>
+        <g class="bike">
+          <g transform="translate(12 135)"><g class="spin"><circle r="14" fill="none" stroke="#2B2730" stroke-width="4"/><path d="M-14 0H14M0-14V14" stroke="#2B2730" stroke-width="1.6"/></g></g>
+          <g transform="translate(60 135)"><g class="spin"><circle r="14" fill="none" stroke="#2B2730" stroke-width="4"/><path d="M-14 0H14M0-14V14" stroke="#2B2730" stroke-width="1.6"/></g></g>
+          <path d="M12 135 L32 135 L25 113 M32 135 L54 112 M25 113 L52 113 M60 135 L52 106 L60 103" stroke="#E9785A" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <g id="rider"></g>
+        </g>
+      </svg>
+      <p class="small muted" style="margin-top:8px">Biết đạp xe (năng lực sẵn có) + bản đồ &amp; biển báo (file .md) = đến đúng nơi nhóm mình muốn.</p>
+    </div>
+
+    <div class="card reveal">
+      <h3>Mỗi sáng, một tờ giấy nhắn</h3>
+      <p>Hãy hình dung một đồng nghiệp sáng nào đến công ty cũng quên chuyện hôm qua. Cách duy nhất để bạn ấy làm tiếp đúng ý: <b>dán sẵn tờ giấy nhắn trên bàn</b>.</p>
+      <div class="wake" aria-hidden="true">
+        <span class="cap c1">Mở phiên mới: đầu óc trống trơn</span>
+        <span class="cap c2">Đọc giấy nhắn: "À, hiểu rồi!"</span>
+        <div class="m w-sleep" data-m="sleep" data-color="#E9785A"></div>
+        <div class="m w-awake" data-m="wow" data-color="#E9785A"></div>
+        <div class="zwrap"><span class="z">z</span><span class="z">z</span><span class="z">z</span></div>
+        <span class="bang">!</span>
+        <span class="doc note" style="--c:var(--coral)">CLAUDE.md</span>
+      </div>
+      <div class="vs">
+        <div class="box yes"><h4>Claude có sẵn</h4><ul class="clean small" style="--b:var(--mint)"><li>Kiến thức chung, ngôn ngữ</li><li>Biết viết, tóm tắt, lập luận</li><li>Biết lập trình</li></ul></div>
+        <div class="box no"><h4>Claude chưa biết</h4><ul class="clean small"><li>Dự án của bạn làm gì</li><li>Quy định riêng của nhóm</li><li>Hôm qua đã làm tới đâu</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout reveal">
+    <div class="m" data-m="happy"></div>
+    <p><b>Điều quan trọng nhất của cả tài liệu:</b> Claude không tự "luyện tập" hay "học thêm" khi bạn dùng nó. Mọi điều Claude cần biết về dự án đều nằm trong <b>các file chữ mà nó đọc lại mỗi lần làm việc</b>. Muốn Claude nhớ điều gì lâu dài → <b>viết nó ra file</b>.</p>
+  </div>
+</section>
+
+<!-- ================= S6 ================= -->
+<section class="sec" id="s6">
+  <div class="sec-head reveal">
+    <div class="num" style="background:var(--mint);box-shadow:0 8px 18px rgba(63,181,143,.35)">2</div>
+    <div>
+      <h2>Cái bàn làm việc có giới hạn</h2>
+      <p>Phần 1 nói Claude quên sạch giữa các phiên. Còn <b>trong một phiên</b>, mọi thứ Claude đọc — file, tin nhắn, kết quả — đều bày lên một "cái bàn", tên chuyên môn là <b>context window</b>. Bàn rất to nhưng không vô hạn. Bàn càng bừa, Claude càng dễ sót ý.</p>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card reveal">
+      <h4>Thử bày đồ lên bàn</h4>
+      <div class="ctx">
+        <div class="ctx-m"><div class="ctx-say" id="ctxSay">Bàn gọn, làm việc sướng!</div><div class="m" id="ctxM" data-m="happy"></div></div>
+        <div class="ctx-desk" id="ctxDesk"></div>
+        <div class="ctx-meter"><div class="meter"><i id="ctxBar"></i></div><b id="ctxPct">12%</b></div>
+      </div>
+      <div class="ctx-btns">
+        <button class="btn" id="cFile">+ Đọc thêm file</button>
+        <button class="btn" id="cChat">+ Trò chuyện thêm</button>
+        <button class="btn" id="cCompact"><code>/compact</code> gom gọn</button>
+        <button class="btn" id="cClear"><code>/clear</code> dọn sạch</button>
+      </div>
+    </div>
+    <div class="card reveal">
+      <h4>Giữ bàn gọn thế nào?</h4>
+      <ul class="clean" style="--b:var(--coral)">
+        <li><b>Mỗi việc một phiên.</b> Xong việc A, gõ <code>/clear</code> rồi mới sang việc B. CLAUDE.md sẽ được đọc lại tự động.</li>
+        <li><b>Việc dài:</b> gõ <code>/compact</code> để Claude gom ghi chú thành bản tóm tắt. Khi bàn gần đầy, Claude cũng tự gom — nhưng có thể sót chi tiết.</li>
+        <li><b>Điều cần nhớ lâu</b> → ghi vào CLAUDE.md, đừng chỉ nói trong chat.</li>
+        <li><b>Những file Claude đọc mỗi phiên (như CLAUDE.md) nên ngắn</b> — vì chúng chiếm chỗ ở mọi phiên.</li>
+        <li>Muốn biết bàn đang đầy cỡ nào? Gõ <code>/context</code>.</li>
+      </ul>
+      <div class="callout mint">
+        <div class="m" data-m="happy" data-color="#3FB58F"></div>
+        <p class="small"><b>Nhớ hình ảnh cái bàn này nhé.</b> Lát nữa bạn sẽ thấy: CLAUDE.md nên ngắn, skill chỉ đọc nhãn trước, agent làm ở bàn riêng… tất cả đều để <b>giữ bàn gọn</b>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= S2 ================= -->
+<section class="sec" id="s2">
+  <div class="sec-head reveal">
+    <div class="num" style="background:var(--sun);box-shadow:0 8px 18px rgba(242,179,61,.35)">3</div>
+    <div>
+      <h2>File .md là gì?</h2>
+      <p><code>.md</code> (Markdown) là <b>file chữ bình thường</b> — giống ghi chú trong app Notes — chỉ thêm vài ký hiệu nhỏ để đánh dấu tiêu đề, gạch đầu dòng, chữ đậm.</p>
+    </div>
+  </div>
+
+  <div class="card reveal">
+    <div class="mdlive">
+      <div>
+        <div class="lbl"><span class="tag sun">Bạn gõ</span> chữ thường + vài ký hiệu</div>
+        <div class="code typer"><div class="bar"><i></i><i></i><i></i><span>CLAUDE.md</span></div><pre id="typeSrc"></pre></div>
+      </div>
+      <div>
+        <div class="lbl"><span class="tag">Hiển thị ra</span> gọn gàng, dễ đọc</div>
+        <div class="rendered" id="typeOut"></div>
+      </div>
+    </div>
+    <div class="legend">
+      <div><code>#</code> Tiêu đề lớn</div>
+      <div><code>##</code> Tiêu đề nhỏ</div>
+      <div><code>-</code> Gạch đầu dòng</div>
+      <div><code>**chữ**</code> In đậm</div>
+      <div><code>`chữ`</code> Tên file, câu lệnh</div>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:18px">
+    <div class="card reveal">
+      <h3>Vì sao Claude "mê" file .md?</h3>
+      <ul class="clean" style="--b:var(--sun)">
+        <li><b>Không có định dạng ẩn</b> như file Word — Claude đọc được trọn vẹn, không sót chữ.</li>
+        <li><b>Người và máy cùng đọc dễ</b> — bạn viết cho Claude, đồng nghiệp đọc cũng hiểu.</li>
+        <li><b>Mở bằng gì cũng được</b>: Notepad, TextEdit, VS Code…</li>
+      </ul>
+    </div>
+    <div class="card reveal">
+      <h3>"Nhãn dán" ở đầu file</h3>
+      <div class="jar">
+        <svg viewBox="0 0 100 120" aria-hidden="true">
+          <rect class="jar-lid" x="22" y="10" width="56" height="16" rx="5" fill="#E9785A"/>
+          <rect x="16" y="28" width="68" height="84" rx="16" fill="#FDF1D6" stroke="#E6C46F" stroke-width="2.5"/>
+          <rect x="24" y="52" width="52" height="30" rx="6" fill="#fff" stroke="#E6C46F" stroke-width="2"/>
+          <line x1="31" y1="62" x2="69" y2="62" stroke="#94650A" stroke-width="3" stroke-linecap="round"/>
+          <line x1="31" y1="72" x2="58" y2="72" stroke="#C9B48A" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="34" cy="98" r="4" fill="#F2B33D"/><circle cx="50" cy="102" r="3" fill="#E9785A"/><circle cx="64" cy="97" r="4" fill="#3FB58F"/>
+        </svg>
+        <p class="small" style="margin:0">Phần nằm giữa hai dòng <code>---</code> ở đầu file gọi là <b>frontmatter</b> — giống nhãn trên hũ gia vị: <b>không cần mở nắp cũng biết bên trong là gì</b>. Claude đọc nhãn này để quyết định có cần mở file ra hay không.</p>
+      </div>
+      <div class="code" style="margin-top:12px"><div class="bar"><i></i><i></i><i></i><span>SKILL.md</span></div><pre class="hl">---
+name: tao-trang-moi
+description: Dùng khi cần tạo một trang mới trong ứng dụng
+---
+# Nội dung hướng dẫn bên trong...</pre></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= S3 ================= -->
+<section class="sec" id="s3">
+  <div class="sec-head reveal">
+    <div class="num" style="background:var(--sky);box-shadow:0 8px 18px rgba(74,163,223,.35)">4</div>
+    <div>
+      <h2>Claude đọc file bằng cách nào?</h2>
+      <p>Claude có "tay và mắt" gọi là <b>công cụ (tools)</b>: đọc file, tìm kiếm, sửa file, chạy lệnh. Khi bạn mở <b>Claude Code</b> trong một thư mục, Claude <b>chỉ nhìn thấy những gì nằm trong thư mục đó</b>.</p>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="reveal">
+      <h4 style="margin-bottom:10px">Một thư mục dự án điển hình</h4>
+      <div class="tree" id="tree">
+<div>du-an-freelancer/</div>
+<div>├── <span class="f-claude">CLAUDE.md</span>              <span class="cm">← sổ tay bàn giao</span></div>
+<div>├── .claude/</div>
+<div>│   ├── <span class="f-rule">rules/</span>                <span class="cm">← nội quy, biển báo</span></div>
+<div>│   │   └── giao-dien.md</div>
+<div>│   ├── <span class="f-skill">skills/</span>               <span class="cm">← kệ sổ công thức</span></div>
+<div>│   │   └── tao-trang-moi/</div>
+<div>│   │       └── SKILL.md</div>
+<div>│   └── <span class="f-agent">agents/</span>               <span class="cm">← đồng nghiệp chuyên môn</span></div>
+<div>│       └── code-reviewer.md</div>
+<div>└── src/                     <span class="cm">← code của ứng dụng</span></div>
+      </div>
+      <p class="small muted" style="margin-top:10px">Thư mục <code>.claude</code> bắt đầu bằng dấu chấm nên thường bị ẩn. Trên Mac, trong Finder nhấn <code>Cmd + Shift + .</code> để hiện.</p>
+    </div>
+
+    <div class="reveal">
+      <h4 style="margin-bottom:10px">3 kiểu đọc khác nhau</h4>
+      <div class="lanes">
+        <div class="lane l1">
+          <div class="info"><h4>Đọc ngay khi mở phiên</h4><p>CLAUDE.md, rules chung, auto memory. Như tờ note dán trên màn hình mỗi sáng.</p></div>
+          <div class="track"><span class="tok doc" style="--c:var(--coral)">CLAUDE.md</span><span class="tok t2 doc" style="--c:var(--sun);top:20%">rules</span></div>
+          <div class="m" data-m="happy"></div>
+        </div>
+        <div class="lane l2">
+          <div class="info"><h4>Đọc nhãn trước, cần mới mở</h4><p>Skills, agents. Như lướt gáy sách trên kệ, cần cuốn nào mới rút ra.</p></div>
+          <div class="track"><span class="tok lab doc" style="--c:var(--sun)">chỉ nhãn</span><span class="hit">khớp yêu cầu!</span><span class="tok full doc" style="--c:var(--mint)">SKILL.md</span></div>
+          <div class="m" data-m="happy" data-color="#E9785A"></div>
+        </div>
+        <div class="lane l3">
+          <div class="info"><h4>Đọc khi cần hoặc khi bạn chỉ</h4><p>Các file khác. Claude tự tìm, hoặc bạn gõ <code>@tên-file</code> để chỉ thẳng.</p></div>
+          <div class="track"><span class="ask">@trang-hop-dong.tsx</span><span class="tok full doc" style="--c:var(--sky)">trang-hop-dong.tsx</span></div>
+          <div class="m" data-m="happy"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= S4 ================= -->
+<section class="sec" id="s4">
+  <div class="sec-head reveal">
+    <div class="num" style="background:var(--mint);box-shadow:0 8px 18px rgba(63,181,143,.35)">5</div>
+    <div>
+      <h2>Bộ tứ: CLAUDE.md · Rules · Skills · Agents</h2>
+      <p>Cả bốn đều là file <code>.md</code>, nhưng mỗi loại một vai trò. Hãy tưởng tượng Claude là nhân viên mới vào công ty, và đây là bốn thứ giúp bạn ấy làm đúng việc.</p>
+    </div>
+  </div>
+
+  <!-- CLAUDE.md -->
+  <article class="quad reveal" style="--q:var(--coral);--qs:var(--coral-soft);--qi:var(--coral-ink)">
+    <div class="q-head">
+      <div class="q-ico">.md</div>
+      <div><span class="tag coral">CLAUDE.md</span><h3>Sổ tay bàn giao</h3><p>Điều Claude <b>luôn</b> cần biết về dự án.</p></div>
+    </div>
+    <div class="grid2">
+      <div class="facts">
+        <div class="fact"><span class="k">Ví von</span><p>Tờ giấy dán trên bàn nhân viên mới: dự án làm gì, chạy thử thế nào, điều tuyệt đối không được làm.</p></div>
+        <div class="fact"><span class="k">Đọc khi nào</span><p><b>Tự động, mỗi lần mở phiên mới.</b> Luôn nằm sẵn "trên bàn" của Claude.</p></div>
+        <div class="fact"><span class="k">Nên viết gì</span><p>Những điều đúng mọi lúc và cần mọi lúc. Viết <b>ngắn gọn</b> — file càng dài càng chiếm chỗ trên bàn.</p></div>
+        <div class="fact"><span class="k">Mẹo</span><p>Gõ <code>/init</code> để Claude tự soạn bản nháp đầu tiên; gõ <code>/memory</code> để mở ra sửa.</p></div>
+      </div>
+      <div class="code"><div class="bar"><i></i><i></i><i></i><span>CLAUDE.md</span></div><pre class="hl"># Dự án Quản lý Freelancer
+Ứng dụng web quản lý freelancer: hồ sơ, hợp đồng, thanh toán.
+
+## Cách chạy thử
+- Gõ `npm run dev` rồi mở localhost:3000
+
+## Luôn nhớ
+- Chữ trên giao diện viết bằng **tiếng Việt**
+- KHÔNG sửa thư mục `core/` — phần này do team kỹ thuật quản lý
+- Làm xong thì chụp màn hình cho người dùng xem</pre></div>
+    </div>
+  </article>
+
+  <!-- Rules -->
+  <article class="quad reveal" style="--q:var(--sun);--qs:var(--sun-soft);--qi:var(--sun-ink)">
+    <div class="q-head">
+      <div class="q-ico">.md</div>
+      <div><span class="tag sun">.claude/rules/</span><h3>Nội quy &amp; biển báo</h3><p>Luật lệ, có thể áp dụng <b>chung</b> hoặc <b>theo khu vực</b>.</p></div>
+    </div>
+    <div class="grid2">
+      <div class="facts">
+        <div class="fact"><span class="k">Ví von</span><p>Có biển dán khắp công ty (luôn áp dụng), và có biển chỉ đặt ở khu riêng — như "Đội mũ bảo hộ" chỉ có ở công trường.</p></div>
+        <div class="fact"><span class="k">Đọc khi nào</span><p><b>Rule thường:</b> ngay khi mở phiên, giống CLAUDE.md.<br><b>Rule có <code>paths</code>:</b> chỉ hiện ra khi Claude đụng vào file thuộc khu vực đó.</p></div>
+        <div class="fact"><span class="k">Vì sao tách riêng</span><p>Chia theo chủ đề nên dễ tìm, dễ sửa. Rule theo khu vực giúp bàn làm việc gọn hơn.</p></div>
+      </div>
+      <div>
+        <div class="zones" aria-hidden="true">
+          <span class="gsign">Biển chung: luôn hiện</span>
+          <div class="zone">tai-lieu/</div>
+          <div class="zone">src/pages/</div>
+          <div class="zone">src/api/</div>
+          <div class="zsign">Quy tắc giao diện</div>
+          <div class="m walker" data-m="happy"></div>
+        </div>
+        <div class="code"><div class="bar"><i></i><i></i><i></i><span>.claude/rules/giao-dien.md</span></div><pre class="hl">---
+paths:
+  - "src/pages/**"
+---
+# Quy tắc giao diện
+- Nút bấm chính dùng màu cam của hệ thống
+- Bảng dữ liệu nào cũng phải có ô tìm kiếm</pre></div>
+      </div>
+    </div>
+  </article>
+
+  <!-- Skills -->
+  <article class="quad reveal" style="--q:var(--mint);--qs:var(--mint-soft);--qi:var(--mint-ink)">
+    <div class="q-head">
+      <div class="q-ico">.md</div>
+      <div><span class="tag">.claude/skills/</span><h3>Kệ sổ công thức</h3><p>Quy trình nhiều bước, <b>cần mới mở ra đọc</b>.</p></div>
+    </div>
+    <div class="grid2">
+      <div class="facts">
+        <div class="fact"><span class="k">Ví von</span><p>Đầu bếp không thuộc lòng mọi món. Trên kệ có nhiều sổ công thức; đầu bếp chỉ nhìn gáy sách, khách gọi món nào mới rút đúng cuốn đó ra làm theo.</p></div>
+        <div class="fact"><span class="k">Đọc khi nào</span><p>Lúc mở phiên <b>chỉ đọc nhãn</b> (name + description). Khi yêu cầu khớp mô tả → mở <code>SKILL.md</code> đọc kỹ. File đính kèm (mẫu, ví dụ) chỉ mở khi cần.</p></div>
+        <div class="fact"><span class="k">Gọi thẳng</span><p>Gõ <code>/tên-skill</code>, ví dụ <code>/tao-trang-moi</code>.</p></div>
+        <div class="fact"><span class="k">Quan trọng nhất</span><p><b>Dòng description.</b> Viết rõ "dùng khi nào", vì Claude dựa vào đó để quyết định có mở sổ hay không.</p></div>
+      </div>
+      <div class="code"><div class="bar"><i></i><i></i><i></i><span>.claude/skills/tao-trang-moi/SKILL.md</span></div><pre class="hl">---
+name: tao-trang-moi
+description: Dùng khi cần tạo một trang (màn hình) mới trong ứng dụng
+---
+# Tạo trang mới
+1. Hỏi người dùng: tên trang, trang hiển thị dữ liệu gì
+2. Copy mẫu từ `templates/trang-mau.tsx`
+3. Thêm trang vào menu bên trái
+4. Chạy thử và chụp màn hình cho người dùng xem</pre></div>
+    </div>
+
+    <div class="shelf-demo">
+      <h4 style="margin:18px 0 8px">Thử xem: bấm một yêu cầu, Claude sẽ chọn sổ nào?</h4>
+      <div class="req-row" id="reqRow">
+        <button class="btn" data-pick="tao-trang-moi">Thêm trang Hợp đồng freelancer</button>
+        <button class="btn" data-pick="kiem-thu">Kiểm tra form đăng ký chạy đúng chưa</button>
+        <button class="btn" data-pick="xuat-excel">Xuất danh sách freelancer ra Excel</button>
+        <button class="btn" data-pick="dich-chu">Đổi chữ "Submit" thành "Gửi"</button>
+        <button class="btn" data-pick="none">Giải thích file này làm gì</button>
+      </div>
+      <div class="shelf-stage">
+        <div class="shelf-m"><div class="think" id="think">Mình đang lướt nhãn trên kệ…</div><div class="m" data-m="happy"></div></div>
+        <div class="shelf" id="shelf">
+          <div class="book" data-skill="tao-trang-moi" style="--bk:var(--coral)"><b>tao-trang-moi</b><span>Dùng khi cần tạo một trang mới</span></div>
+          <div class="book" data-skill="kiem-thu" style="--bk:var(--sky)"><b>kiem-thu</b><span>Dùng khi cần kiểm tra một chức năng có chạy đúng không</span></div>
+          <div class="book" data-skill="xuat-excel" style="--bk:var(--mint)"><b>xuat-excel</b><span>Dùng khi cần xuất dữ liệu ra file Excel</span></div>
+          <div class="book" data-skill="dich-chu" style="--bk:var(--lav)"><b>dich-chu</b><span>Dùng khi cần thêm hoặc sửa chữ hiển thị trên giao diện</span></div>
+        </div>
+      </div>
+      <div class="opened" id="opened"></div>
+    </div>
+  </article>
+
+  <!-- Agents -->
+  <article class="quad reveal" style="--q:var(--lav);--qs:var(--lav-soft);--qi:var(--lav-ink)">
+    <div class="q-head">
+      <div class="q-ico">.md</div>
+      <div><span class="tag lav">.claude/agents/</span><h3>Đồng nghiệp chuyên môn ở phòng riêng</h3><p>Nhận việc, <b>làm riêng</b>, rồi gửi lại <b>bản tóm tắt</b>.</p></div>
+    </div>
+    <div class="grid2">
+      <div class="facts">
+        <div class="fact"><span class="k">Ví von</span><p>Bạn là trưởng nhóm, giao việc soát lỗi cho chuyên viên kiểm định. Họ bày tài liệu ở bàn riêng, xong chỉ gửi lại bản tóm tắt một trang. Bàn của bạn vẫn gọn.</p></div>
+        <div class="fact"><span class="k">Hoạt động khi nào</span><p>Claude chính tự giao khi việc khớp mô tả của agent, hoặc bạn bảo thẳng: <i>"Dùng agent code-reviewer kiểm tra giúp mình."</i></p></div>
+        <div class="fact"><span class="k">Khác skill ở đâu</span><p><b>Skill:</b> Claude tự đọc công thức rồi tự làm, trên bàn của mình.<br><b>Agent:</b> giao cho "người khác" làm ở bàn riêng, có thể giới hạn quyền (ví dụ chỉ được đọc, không được sửa).</p></div>
+      </div>
+      <div class="code"><div class="bar"><i></i><i></i><i></i><span>.claude/agents/code-reviewer.md</span></div><pre class="hl">---
+name: code-reviewer
+description: Kiểm tra code vừa viết trước khi gửi team kỹ thuật review
+tools: Read, Grep, Glob
+---
+Bạn là người soát lỗi cẩn thận. Hãy kiểm tra:
+- Chữ trên giao diện có sai chính tả không
+- Có để lộ mật khẩu hay khóa bí mật không
+- Có lỡ sửa vào thư mục `core/` không
+Trả về danh sách vấn đề, xếp theo mức độ nghiêm trọng.</pre></div>
+    </div>
+
+    <div class="dispatch" id="dispatch" style="margin-top:18px">
+      <div class="boss">
+        <div class="m" data-m="happy"></div>
+        <div class="desk-mini"><span>Bàn của Claude chính</span><div class="pile" id="bossPile"></div></div>
+      </div>
+      <div class="rooms">
+        <div class="room" id="room1" style="--rc:var(--mint)">
+          <div class="room-lbl">Phòng code-reviewer</div>
+          <div class="m" data-m="happy" data-color="#3FB58F"></div>
+          <div class="room-work"><span class="busy"><i></i><i></i><i></i></span><div class="room-pile"></div></div>
+        </div>
+        <div class="room" id="room2" style="--rc:var(--lav)">
+          <div class="room-lbl">Phòng tester</div>
+          <div class="m" data-m="happy" data-color="#8C7BE6"></div>
+          <div class="room-work"><span class="busy"><i></i><i></i><i></i></span><div class="room-pile"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="dispatch-foot">
+      <button class="btn primary" id="dispatchBtn">Giao việc cho 2 agent</button>
+      <span class="status" id="dispatchStatus">Bấm nút để xem Claude chính chia việc.</span>
+    </div>
+  </article>
+
+</section>
+
+<!-- ================= S4b: extras ================= -->
+<section class="sec" id="s4b">
+  <div class="sec-head reveal">
+    <div class="num" style="background:var(--pink);box-shadow:0 8px 18px rgba(232,111,154,.35)">6</div>
+    <div>
+      <h2>Đồ nghề mở rộng: Memory, chế độ xin phép, Rewind…</h2>
+      <p>Ngoài bộ tứ, Claude Code còn vài thứ rất đáng biết. Bạn không cần tự cài hết — nhưng biết chúng tồn tại để dùng đúng lúc.</p>
+    </div>
+  </div>
+
+  <!-- Memory -->
+  <article class="quad reveal" style="--q:var(--pink);--qs:var(--pink-soft);--qi:var(--pink-ink)">
+    <div class="q-head">
+      <div class="q-ico">.md</div>
+      <div><span class="tag pink">Memory</span><h3>Trí nhớ của Claude: hai loại sổ</h3><p>Một sổ <b>bạn viết</b> (CLAUDE.md), một sổ <b>Claude tự ghi</b> (auto memory).</p></div>
+    </div>
+    <div class="grid2">
+      <div>
+        <h4>Sổ bạn viết: CLAUDE.md có nhiều tầng</h4>
+        <p class="small muted">Như nội quy tập đoàn → thói quen cá nhân → nội quy phòng ban → giấy nhớ riêng trên bàn. Claude đọc tất cả, chồng lên nhau.</p>
+        <div class="layers">
+          <div class="layer l-org"><b>Công ty</b><span>Do IT cài, áp dụng cho mọi người trong tổ chức</span></div>
+          <div class="layer l-user"><b>Cá nhân · <code>~/.claude/CLAUDE.md</code></b><span>Thói quen của riêng bạn, dùng cho mọi dự án</span></div>
+          <div class="layer l-proj"><b>Dự án · <code>./CLAUDE.md</code></b><span>Cả team dùng chung, lưu cùng với code</span></div>
+          <div class="layer l-local"><b>Riêng tư trong dự án · <code>CLAUDE.local.md</code></b><span>Chỉ mình bạn thấy, không chia sẻ cho team</span></div>
+        </div>
+        <p class="small muted" style="margin-top:10px">Mẹo: trong CLAUDE.md có thể "trỏ" sang file khác bằng <code>@đường-dẫn</code>, ví dụ <code>@docs/quy-trinh.md</code>, để khỏi viết lại.</p>
+      </div>
+      <div>
+        <h4>Sổ Claude tự ghi: auto memory</h4>
+        <div class="memo-scene" aria-hidden="true">
+          <div class="say-user">Lần sau nhớ chụp cả bản mobile nhé!</div>
+          <div class="m" data-m="happy"></div>
+          <div class="notebook">
+            <div class="nb-head">MEMORY.md</div>
+            <div class="nb-line">- Trả lời bằng tiếng Việt</div>
+            <div class="nb-line">- Trang mới cần có ô tìm kiếm</div>
+            <div class="nb-line new">- Luôn chụp thêm bản mobile<svg class="pencil" viewBox="0 0 30 30"><path d="M4 26 L7 18 L22 3 L27 8 L12 23 Z" fill="#F2B33D" stroke="#2B2730" stroke-width="1.6" stroke-linejoin="round"/><path d="M4 26 L7 18 L12 23 Z" fill="#FBE3C2" stroke="#2B2730" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+        <ul class="clean small" style="--b:var(--pink);margin-top:12px">
+          <li>Khi bạn sửa lưng hay nhắc nhở, Claude <b>tự ghi lại điều học được</b> để lần sau khỏi nhắc.</li>
+          <li>Sổ lưu trên máy bạn. Đầu mỗi phiên, Claude đọc phần mục lục <code>MEMORY.md</code> (khoảng 200 dòng đầu).</li>
+          <li>Gõ <code>/memory</code> để xem, sửa, hoặc bật/tắt.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout coral">
+      <div class="m" data-m="wow"></div>
+      <p class="small"><b>Cả hai loại sổ đều là "lời dặn", không phải "ổ khóa".</b> Claude cố gắng làm theo nhưng không đảm bảo 100%. Việc bắt buộc tuyệt đối → nhờ team kỹ thuật dùng hook hoặc cài đặt quyền. Điều quan trọng với cả team → ghi vào CLAUDE.md của dự án, đừng chỉ trông vào auto memory.</p>
+    </div>
+  </article>
+
+  <!-- Permission modes -->
+  <article class="quad reveal" style="--q:var(--sky);--qs:var(--sky-soft);--qi:var(--sky-ink)">
+    <div class="q-head">
+      <div class="q-ico">key</div>
+      <div><span class="tag sky">Permission modes</span><h3>Chế độ xin phép: đưa chìa khóa đến đâu?</h3><p>Giống giao chìa khóa nhà cho người dọn dẹp: chỉ cho xem, cho dọn nhưng hỏi trước, hay tin tưởng giao hết.</p></div>
+    </div>
+    <div class="req-row" id="permModes">
+      <button class="btn on" data-mode="manual">Manual</button>
+      <button class="btn" data-mode="edits">Edit automatically</button>
+      <button class="btn" data-mode="plan">Plan</button>
+      <button class="btn" data-mode="auto">Auto</button>
+    </div>
+    <div class="perm-grid">
+      <div class="perm-table" id="permTable"></div>
+      <div class="perm-note" id="permNote"></div>
+    </div>
+    <p class="small muted" style="margin:12px 0 0">Đổi chế độ: nhấn <code>Shift + Tab</code> trong terminal, hoặc bấm vào ô chế độ cạnh khung chat (VS Code, ứng dụng). Còn chế độ <b>Bypass permissions</b> bỏ qua mọi câu hỏi — chỉ dành cho môi trường thử nghiệm, bạn đừng bật.</p>
+  </article>
+
+  <div class="grid3">
+    <div class="card mini reveal">
+      <svg class="ico" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="17" fill="#FDE6DD" stroke="#E9785A" stroke-width="3"/><line class="hand" x1="22" y1="22" x2="22" y2="10" stroke="#2B2730" stroke-width="3" stroke-linecap="round"/><circle cx="22" cy="22" r="2.5" fill="#2B2730"/><path d="M6 10 L6 17 L13 17" fill="none" stroke="#E9785A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="tag coral">Checkpoint · Rewind</span><h4>Nút quay ngược thời gian</h4>
+      <p class="small">Mỗi lần bạn gửi yêu cầu, Claude Code lưu một "điểm khôi phục". Nhấn <code>Esc</code> hai lần hoặc gõ <code>/rewind</code> để quay lại code, cuộc trò chuyện, hoặc cả hai. Việc đã gửi ra ngoài (như đẩy code lên server) thì không quay lại được.</p>
+    </div>
+    <div class="card mini reveal">
+      <svg class="ico" viewBox="0 0 44 44" aria-hidden="true"><rect x="6" y="6" width="7" height="34" rx="3" fill="#4AA3DF"/><rect x="31" y="6" width="7" height="34" rx="3" fill="#4AA3DF"/><line class="beam" x1="13" y1="20" x2="31" y2="20" stroke="#E9785A" stroke-width="3" stroke-dasharray="4 3"/><line class="beam" x1="13" y1="28" x2="31" y2="28" stroke="#E9785A" stroke-width="3" stroke-dasharray="4 3" style="animation-delay:.3s"/></svg>
+      <span class="tag sky">Hooks</span><h4>Cổng từ ở siêu thị</h4>
+      <p class="small">Việc <b>tự động chạy 100%</b> mỗi khi có sự kiện, không cần Claude nhớ. Ví dụ: mỗi lần Claude sửa file thì tự chạy kiểm tra định dạng. Thường do team kỹ thuật cài.</p>
+    </div>
+    <div class="card mini reveal">
+      <svg class="ico" viewBox="0 0 44 44" aria-hidden="true"><rect x="27" y="10" width="13" height="24" rx="4" fill="#DDF4EC" stroke="#3FB58F" stroke-width="2.5"/><g class="plug"><rect x="6" y="15" width="13" height="14" rx="3" fill="#3FB58F"/><line x1="19" y1="18" x2="25" y2="18" stroke="#2B2730" stroke-width="2.5"/><line x1="19" y1="26" x2="25" y2="26" stroke="#2B2730" stroke-width="2.5"/></g></svg>
+      <span class="tag">MCP · Connectors</span><h4>Ổ cắm kết nối</h4>
+      <p class="small">Cho Claude "cắm" vào ứng dụng khác như Jira, Slack, Google Drive để đọc hoặc cập nhật thông tin ở đó. Gõ <code>/mcp</code> để xem đang cắm những gì.</p>
+    </div>
+    <div class="card mini reveal">
+      <svg class="ico" viewBox="0 0 44 44" aria-hidden="true"><rect x="7" y="18" width="30" height="20" rx="3" fill="#ECE8FD" stroke="#8C7BE6" stroke-width="2.5"/><g class="lid"><rect x="5" y="11" width="34" height="8" rx="3" fill="#8C7BE6"/></g><rect x="18" y="23" width="8" height="6" rx="2" fill="#8C7BE6"/></svg>
+      <span class="tag lav">Plugins</span><h4>Hộp đồ nghề đóng gói sẵn</h4>
+      <p class="small">Gom skills, agents, hooks, MCP thành một gói để cài một lần. Team kỹ thuật có thể đóng gói sẵn cho cả nhóm dùng chung. Gõ <code>/plugin</code> để xem.</p>
+    </div>
+    <div class="card mini reveal">
+      <svg class="ico" viewBox="0 0 44 44" aria-hidden="true"><path d="M6 10 Q6 6 10 6 H34 Q38 6 38 10 V26 Q38 30 34 30 H18 L10 37 V30 Q6 30 6 26Z" fill="#FDF1D6" stroke="#F2B33D" stroke-width="2.5" stroke-linejoin="round"/><circle class="d1" cx="15" cy="18" r="2.6" fill="#F2B33D"/><circle class="d2" cx="22" cy="18" r="2.6" fill="#F2B33D"/><circle class="d3" cx="29" cy="18" r="2.6" fill="#F2B33D"/></svg>
+      <span class="tag sun">Output styles</span><h4>Đổi giọng văn</h4>
+      <p class="small">Đổi cách Claude trả lời. Ví dụ kiểu <b>Explanatory</b>: vừa làm vừa giải thích vì sao làm vậy — rất hợp khi bạn đang học.</p>
+    </div>
+    <div class="card mini reveal">
+      <svg class="ico" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="17" fill="#FCE3EC" stroke="#E86F9A" stroke-width="2.5"/><path class="brain" d="M15 24 Q13 16 20 14 Q24 10 28 15 Q33 17 30 24 Q28 30 22 29 Q17 30 15 24Z" fill="#E86F9A"/></svg>
+      <span class="tag pink">Model</span><h4>Chọn "bộ não"</h4>
+      <p class="small">Claude có nhiều phiên bản: <b>Opus</b> (mạnh nhất, cho việc khó), <b>Sonnet</b> (cân bằng), <b>Haiku</b> (nhanh, nhẹ). Gõ <code>/model</code> để đổi.</p>
+    </div>
+  </div>
+
+  <h4 class="reveal" style="margin:26px 0 12px">Bảng lệnh nhanh — gõ trong khung chat của Claude Code</h4>
+  <div class="cmds reveal">
+    <div class="cmd"><code>/init</code><span>Soạn bản nháp CLAUDE.md đầu tiên</span></div>
+    <div class="cmd"><code>/memory</code><span>Xem, sửa CLAUDE.md và auto memory</span></div>
+    <div class="cmd"><code>/clear</code><span>Dọn bàn, bắt đầu việc mới</span></div>
+    <div class="cmd"><code>/compact</code><span>Gom bàn thành bản tóm tắt</span></div>
+    <div class="cmd"><code>/context</code><span>Xem bàn đang đầy bao nhiêu</span></div>
+    <div class="cmd"><code>/plan</code><span>Vào chế độ lên kế hoạch trước</span></div>
+    <div class="cmd"><code>/rewind</code><span>Quay lại điểm khôi phục trước đó</span></div>
+    <div class="cmd"><code>/resume</code><span>Mở lại một cuộc trò chuyện cũ</span></div>
+    <div class="cmd"><code>/model</code><span>Đổi model (Opus, Sonnet, Haiku)</span></div>
+    <div class="cmd"><code>/agents</code><span>Xem và tạo agent</span></div>
+    <div class="cmd"><code>@tên-file</code><span>Chỉ thẳng một file cho Claude đọc</span></div>
+    <div class="cmd"><code>Esc</code><span>Dừng Claude giữa chừng</span></div>
+    <div class="cmd"><code>Esc Esc</code><span>Mở menu quay ngược (rewind)</span></div>
+    <div class="cmd"><code>Shift + Tab</code><span>Đổi chế độ xin phép</span></div>
+  </div>
+</section>
+
+<!-- ================= S5 ================= -->
+<section class="sec" id="s5">
+  <div class="sec-head reveal">
+    <div class="num" style="background:var(--lav);box-shadow:0 8px 18px rgba(140,123,230,.35)">7</div>
+    <div>
+      <h2>Một phiên làm việc, từ đầu đến cuối</h2>
+      <p>Ghép mọi thứ lại: chuyện gì xảy ra từ lúc bạn mở Claude Code đến lúc nhận kết quả. Để ý thanh "bàn làm việc" đầy dần lên.</p>
+    </div>
+  </div>
+  <div class="card reveal" id="player">
+    <div class="pl-grid">
+      <ol class="steps" id="steps"></ol>
+      <div>
+        <div class="pl-now">
+          <div class="m" id="plM" data-m="sleep"></div>
+          <div><span class="tag lav" id="plTag">Bước 1/9</span><h3 id="plTitle"></h3><p id="plText"></p></div>
+        </div>
+        <div class="desk">
+          <div class="desk-head"><span>Bàn làm việc của Claude</span><span id="deskPct">3%</span></div>
+          <div class="meter"><i id="deskBar"></i></div>
+          <div class="desk-items" id="deskItems"></div>
+        </div>
+        <div class="pl-ctrl">
+          <button class="btn primary" id="plPlay">Phát</button>
+          <button class="btn" id="plPrev">Lùi</button>
+          <button class="btn" id="plNext">Tiếp</button>
+          <button class="btn" id="plReset">Xem lại từ đầu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= S7 ================= -->
+<section class="sec" id="s7">
+  <div class="sec-head reveal">
+    <div class="num" style="background:var(--sun);box-shadow:0 8px 18px rgba(242,179,61,.35)">8</div>
+    <div>
+      <h2>So sánh nhanh &amp; nên dùng cái nào</h2>
+      <p>Một bảng để tra cứu, và năm câu hỏi giúp bạn chọn đúng chỗ đặt thông tin.</p>
+    </div>
+  </div>
+  <div class="card table-wrap reveal">
+    <table class="cmp">
+      <thead><tr><th></th><th>Ví von</th><th>Claude đọc khi nào</th><th>Ai kích hoạt</th><th>Đặt ở đâu</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag coral">CLAUDE.md</span></td><td>Sổ tay bàn giao</td><td>Mỗi lần mở phiên</td><td>Tự động</td><td><code>CLAUDE.md</code> ở gốc dự án</td></tr>
+        <tr><td><span class="tag sun">Rules</span></td><td>Nội quy, biển báo</td><td>Khi mở phiên, hoặc khi đụng đúng khu vực</td><td>Tự động</td><td><code>.claude/rules/</code></td></tr>
+        <tr><td><span class="tag">Skills</span></td><td>Sổ công thức trên kệ</td><td>Đọc nhãn trước, cần mới mở</td><td>Claude tự chọn, hoặc bạn gõ <code>/tên</code></td><td><code>.claude/skills/</code></td></tr>
+        <tr><td><span class="tag lav">Agents</span></td><td>Đồng nghiệp ở phòng riêng</td><td>Khi được giao việc</td><td>Claude chính giao, hoặc bạn yêu cầu</td><td><code>.claude/agents/</code></td></tr>
+        <tr><td><span class="tag pink">Auto memory</span></td><td>Sổ nhật ký của Claude</td><td>Mỗi lần mở phiên (phần mục lục)</td><td>Claude tự ghi</td><td>Trên máy bạn, xem bằng <code>/memory</code></td></tr>
+        <tr><td><span class="tag sky">Hooks</span></td><td>Cổng từ siêu thị</td><td>Mỗi khi sự kiện xảy ra</td><td>Hệ thống, chắc chắn 100%</td><td><code>.claude/settings.json</code></td></tr>
+        <tr><td><span class="tag lav">Plugins</span></td><td>Hộp đồ nghề đóng gói</td><td>Tùy món bên trong</td><td>Cài một lần bằng <code>/plugin</code></td><td>Cài từ "chợ" plugin của nhóm</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="decide">
+    <div class="dq reveal"><span>Claude cần biết điều này <b>mọi lúc</b>?</span><span class="arrow">→</span><span class="tag coral">CLAUDE.md</span></div>
+    <div class="dq reveal"><span>Chỉ áp dụng cho <b>một khu vực</b> hay một loại file?</span><span class="arrow">→</span><span class="tag sun">Rule có <code>paths</code></span></div>
+    <div class="dq reveal"><span>Là <b>quy trình nhiều bước</b>, thỉnh thoảng mới dùng?</span><span class="arrow">→</span><span class="tag">Skill</span></div>
+    <div class="dq reveal"><span>Việc nặng, nên <b>làm riêng rồi báo kết quả</b>?</span><span class="arrow">→</span><span class="tag lav">Agent</span></div>
+    <div class="dq reveal"><span>Chỉ là <b>thói quen riêng của bạn</b>, không cần cả team biết?</span><span class="arrow">→</span><span class="tag pink">CLAUDE.local.md / auto memory</span></div>
+    <div class="dq reveal"><span><b>Bắt buộc</b> xảy ra, không được quên lần nào?</span><span class="arrow">→</span><span class="tag sky">Hook (nhờ team kỹ thuật)</span></div>
+  </div>
+</section>
+
+<!-- ================= S8 ================= -->
+<section class="sec" id="s8">
+  <div class="sec-head reveal">
+    <div class="num" style="background:var(--mint);box-shadow:0 8px 18px rgba(63,181,143,.35)">9</div>
+    <div>
+      <h2>Giao việc cho Claude thế nào cho hiệu quả?</h2>
+      <p>Cứ coi như đang giao việc cho một đồng nghiệp mới: càng rõ ràng, kết quả càng đúng ý.</p>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="stack">
+      <div class="prompt bad reveal"><span class="lbl">Chưa tốt</span><p>"Làm trang freelancer."</p><p class="small muted" style="margin:0">Claude phải tự đoán: trang gì? hiện những gì? giống trang nào?</p></div>
+      <div class="prompt good reveal"><span class="lbl">Tốt hơn</span>
+        <p><mark class="h1">Tạo trang "Danh sách freelancer"</mark> <mark class="h2">để team vận hành tìm nhanh freelancer theo tên và kỹ năng.</mark> <mark class="h3">Bảng gồm tên, kỹ năng, trạng thái hợp đồng, có ô tìm kiếm.</mark> <mark class="h4">Làm giống trang "Danh sách đối tác" đang có.</mark> <mark class="h5">Chưa cần nút xóa.</mark> <mark class="h6">Lên kế hoạch cho mình xem trước khi sửa.</mark></p>
+        <div class="mk-legend"><span class="h1">Việc gì</span><span class="h2">Để làm gì</span><span class="h3">Chi tiết</span><span class="h4">Mẫu tham khảo</span><span class="h5">Giới hạn</span><span class="h6">Cách làm</span></div>
+      </div>
+    </div>
+    <div class="card reveal">
+      <h4>5 thói quen nhỏ, hiệu quả lớn</h4>
+      <ol class="tips">
+        <li><span>Nói <b>"để làm gì"</b>, không chỉ "làm gì".</span></li>
+        <li><span>Đưa <b>ví dụ</b>: ảnh chụp màn hình, file mẫu, trang có sẵn để làm theo.</span></li>
+        <li><span>Việc lớn → <b>chia nhỏ</b>, làm xong từng phần rồi mới sang phần tiếp.</span></li>
+        <li><span>Bảo Claude <b>lên kế hoạch trước</b>, bạn duyệt rồi mới làm.</span></li>
+        <li><span><b>Luôn kiểm tra lại.</b> Claude có thể sai một cách rất tự tin.</span></li>
+      </ol>
+    </div>
+  </div>
+  <div class="callout coral reveal">
+    <div class="m" data-m="wow"></div>
+    <p><b>An toàn là trên hết.</b> Claude sẽ hỏi trước khi sửa file hay chạy lệnh — <b>đọc kỹ rồi mới bấm đồng ý</b>. Không dán mật khẩu, khóa bí mật hay dữ liệu cá nhân của khách hàng vào chat. Không chắc chắn? Dừng lại và hỏi team kỹ thuật.</p>
+  </div>
+</section>
+
+<!-- ================= S9 ================= -->
+<section class="sec" id="s9">
+  <div class="sec-head reveal">
+    <div class="num" style="background:var(--sky);box-shadow:0 8px 18px rgba(74,163,223,.35)">10</div>
+    <div>
+      <h2>Từ điển mini</h2>
+      <p>Những từ bạn sẽ nghe thường xuyên, giải thích trong một câu.</p>
+    </div>
+  </div>
+  <div class="gloss">
+    <div class="term reveal"><b>Prompt</b><span>Câu yêu cầu bạn gõ cho Claude.</span></div>
+    <div class="term reveal"><b>Phiên (session)</b><span>Một lần làm việc, từ lúc mở đến lúc đóng hoặc gõ <code>/clear</code>.</span></div>
+    <div class="term reveal"><b>Context window</b><span>"Cái bàn": lượng thông tin Claude giữ được cùng lúc.</span></div>
+    <div class="term reveal"><b>Token</b><span>Mẩu chữ nhỏ (thường là một phần của từ) — đơn vị đo độ dài, cũng là đơn vị tính chi phí.</span></div>
+    <div class="term reveal"><b>Model</b><span>"Bộ não" đã được huấn luyện sẵn, ví dụ Opus, Sonnet, Haiku.</span></div>
+    <div class="term reveal"><b>Tool (công cụ)</b><span>"Tay và mắt" của Claude: đọc, tìm, sửa file, chạy lệnh.</span></div>
+    <div class="term reveal"><b>Frontmatter</b><span>"Nhãn dán" ở đầu file, nằm giữa hai dòng <code>---</code>.</span></div>
+    <div class="term reveal"><b>Lệnh gạch chéo</b><span>Lệnh bắt đầu bằng <code>/</code>, như <code>/clear</code>, <code>/init</code>.</span></div>
+    <div class="term reveal"><b>Hook</b><span>Việc tự động chạy mỗi khi có một sự kiện nhất định.</span></div>
+    <div class="term reveal"><b>MCP</b><span>Chuẩn "ổ cắm" để Claude kết nối với ứng dụng khác.</span></div>
+    <div class="term reveal"><b>Compact</b><span>Gom những gì trên bàn thành bản tóm tắt để có thêm chỗ trống.</span></div>
+    <div class="term reveal"><b>Auto memory</b><span>Sổ ghi chú Claude tự viết về thói quen, yêu cầu của bạn.</span></div>
+    <div class="term reveal"><b>Checkpoint</b><span>Điểm khôi phục, tạo mỗi lần bạn gửi yêu cầu, dùng để quay lại.</span></div>
+    <div class="term reveal"><b>Plan mode</b><span>Chế độ chỉ đọc và lên kế hoạch, chưa sửa gì.</span></div>
+    <div class="term reveal"><b>Plugin</b><span>Gói gồm skills, agents, hooks, MCP — cài một lần là có đủ.</span></div>
+    <div class="term reveal"><b>Ảo giác (hallucination)</b><span>Khi Claude đưa ra thông tin sai nhưng nghe rất thật.</span></div>
+  </div>
+</section>
+
+<!-- ================= S10 ================= -->
+<section class="sec" id="s10">
+  <div class="sec-head reveal">
+    <div class="num" style="background:var(--lav);box-shadow:0 8px 18px rgba(140,123,230,.35)">11</div>
+    <div>
+      <h2>Thử tài một chút</h2>
+      <p>Đoán trước rồi bấm vào thẻ để lật xem đáp án.</p>
+    </div>
+  </div>
+  <div class="flips">
+    <button class="flip reveal" aria-pressed="false"><div class="inner"><div class="face front"><span class="qn">Câu 1</span><p>Hôm qua mình đã dặn Claude trong chat. Hôm nay mở phiên mới, Claude còn nhớ không?</p><span class="hint">Bấm để lật</span></div><div class="face back"><p><b>Không chắc.</b> Mỗi phiên mới bắt đầu với cái bàn trống. Auto memory có thể đã ghi lại vài điều, nhưng đừng trông chờ hoàn toàn. Điều quan trọng → ghi vào CLAUDE.md. Đó là cách chắc chắn nhất.</p></div></div></button>
+    <button class="flip reveal" aria-pressed="false"><div class="inner"><div class="face front"><span class="qn">Câu 2</span><p>Dự án có 30 skill. Bàn làm việc của Claude có bị đầy ngay từ đầu không?</p><span class="hint">Bấm để lật</span></div><div class="face back"><p><b>Không.</b> Lúc đầu Claude chỉ đọc nhãn (name + description) — rất nhẹ. Nội dung của skill chỉ được mở khi thật sự dùng tới.</p></div></div></button>
+    <button class="flip reveal" aria-pressed="false"><div class="inner"><div class="face front"><span class="qn">Câu 3</span><p>Bạn viết một skill rất hay nhưng Claude chẳng bao giờ dùng. Lỗi thường nằm ở đâu?</p><span class="hint">Bấm để lật</span></div><div class="face back"><p><b>Ở dòng description.</b> Mô tả mơ hồ thì Claude không biết khi nào nên mở. Hãy viết rõ "Dùng khi…". Hoặc gọi thẳng bằng <code>/tên-skill</code>.</p></div></div></button>
+    <button class="flip reveal" aria-pressed="false"><div class="inner"><div class="face front"><span class="qn">Câu 4</span><p>Muốn Claude không bao giờ đụng vào thư mục <code>core/</code>. Ghi ở đâu?</p><span class="hint">Bấm để lật</span></div><div class="face back"><p><b>Ghi vào CLAUDE.md hoặc rule</b> — đó là lời dặn. Nếu cần chặn chắc chắn 100%, nhờ team kỹ thuật cài hook hoặc giới hạn quyền — đó là ổ khóa.</p></div></div></button>
+    <button class="flip reveal" aria-pressed="false"><div class="inner"><div class="face front"><span class="qn">Câu 5</span><p>Skill và agent khác nhau thế nào? Trả lời trong một câu.</p><span class="hint">Bấm để lật</span></div><div class="face back"><p><b>Skill</b> là công thức Claude tự đọc rồi tự làm; <b>agent</b> là đồng nghiệp làm ở phòng riêng rồi gửi tóm tắt về.</p></div></div></button>
+    <button class="flip reveal" aria-pressed="false"><div class="inner"><div class="face front"><span class="qn">Câu 6</span><p>Claude trả lời rất tự tin. Vậy là đúng 100%?</p><span class="hint">Bấm để lật</span></div><div class="face back"><p><b>Không.</b> Claude có thể sai mà vẫn nghe rất thuyết phục ("ảo giác"). Luôn chạy thử và xem lại kết quả trước khi dùng.</p></div></div></button>
+    <button class="flip reveal" aria-pressed="false"><div class="inner"><div class="face front"><span class="qn">Câu 7</span><p>Claude vừa sửa hỏng mất trang đang chạy tốt. Có cách nào quay lại không?</p><span class="hint">Bấm để lật</span></div><div class="face back"><p><b>Có.</b> Nhấn <code>Esc</code> hai lần hoặc gõ <code>/rewind</code> để quay về điểm khôi phục trước đó — code, cuộc trò chuyện, hoặc cả hai. Riêng việc đã gửi ra ngoài thì không quay lại được.</p></div></div></button>
+    <button class="flip reveal" aria-pressed="false"><div class="inner"><div class="face front"><span class="qn">Câu 8</span><p>Sắp làm một thay đổi lớn, chưa muốn Claude sửa gì vội. Dùng chế độ nào?</p><span class="hint">Bấm để lật</span></div><div class="face back"><p><b>Plan mode.</b> Gõ <code>/plan</code> hoặc nhấn <code>Shift + Tab</code>. Claude chỉ đọc, tìm hiểu rồi trình bày kế hoạch; bạn duyệt xong mới bắt đầu sửa.</p></div></div></button>
+  </div>
+</section>
+
+<section class="outro reveal">
+  <div class="outro-m"><div class="m" data-m="happy"></div><span class="heart">♥</span><span class="heart">♥</span><span class="heart">♥</span></div>
+  <div>
+    <h2>Nhớ 6 dòng là đủ</h2>
+    <div class="recap">
+      <div><span class="tag coral">CLAUDE.md</span> Điều Claude luôn cần biết.</div>
+      <div><span class="tag sun">Rules</span> Luật lệ, chung hoặc theo khu vực.</div>
+      <div><span class="tag">Skills</span> Sổ công thức, cần mới mở.</div>
+      <div><span class="tag lav">Agents</span> Đồng nghiệp làm riêng, gửi tóm tắt.</div>
+      <div><span class="tag pink">Auto memory</span> Sổ Claude tự ghi thói quen của bạn.</div>
+      <div><span class="tag sky">Esc Esc</span> Quay ngược khi lỡ tay.</div>
+    </div>
+    <p class="small muted" style="margin-top:12px">Còn thắc mắc? Cứ hỏi thẳng Claude: <i>"Giải thích cho mình file CLAUDE.md của dự án này đang dặn những gì."</i></p>
+  </div>
+</section>
+
+
+
+</main>
+<footer class="foot">Claude 101 · Tài liệu cho người mới bắt đầu với Claude Code</footer>
+
+<script>
+(function(){
+  const INK = '#2B2730';
+  const REDUCED = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+
+  /* ---------- mascot ---------- */
+  function mascot(color, mood, cls){
+    color = color || '#E9785A'; mood = mood || 'happy';
+    const eyes = mood === 'sleep'
+      ? `<path d="M39 64 Q46 70 53 64" stroke="${INK}" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M67 64 Q74 70 81 64" stroke="${INK}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`
+      : `<g class="m-eyes"><ellipse cx="46" cy="63" rx="6.5" ry="8.5" fill="${INK}"/><ellipse cx="74" cy="63" rx="6.5" ry="8.5" fill="${INK}"/><circle cx="48.6" cy="59.5" r="2.3" fill="#fff"/><circle cx="76.6" cy="59.5" r="2.3" fill="#fff"/></g>`;
+    let mouth = `<path d="M53 80 Q60 87 67 80" stroke="${INK}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
+    if (mood === 'wow') mouth = `<ellipse cx="60" cy="83" rx="5" ry="6" fill="${INK}"/>`;
+    if (mood === 'sweat') mouth = `<path d="M52 85 Q56 81 60 85 Q64 89 68 85" stroke="${INK}" stroke-width="3.2" fill="none" stroke-linecap="round"/>`;
+    if (mood === 'sleep') mouth = `<ellipse cx="60" cy="83" rx="4" ry="3" fill="${INK}"/>`;
+    const extra = mood === 'sweat' ? `<path class="m-drop" d="M98 38 C 94 45 93 49 98 51 C 103 49 102 45 98 38Z" fill="#7CC6F2"/>` : '';
+    return `<svg viewBox="0 0 120 120" ${cls === false ? '' : 'class="m-svg"'} aria-hidden="true">
+      <ellipse class="m-shadow" cx="60" cy="113" rx="30" ry="5" fill="rgba(60,40,20,.10)"/>
+      <g class="m-body">
+        <path d="M60 22 C 60 14 66 9 72 9" stroke="${INK}" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <circle cx="74" cy="9" r="5.5" fill="#F2B33D"/>
+        <path d="M60 22 C 94 22 104 46 104 69 C 104 93 86 107 60 107 C 34 107 16 93 16 69 C 16 46 26 22 60 22 Z" fill="${color}"/>
+        <ellipse cx="42" cy="40" rx="11" ry="6" fill="#fff" opacity=".3" transform="rotate(-24 42 40)"/>
+        ${eyes}
+        <ellipse cx="34" cy="77" rx="7" ry="4.5" fill="#FF8FA3" opacity=".55"/>
+        <ellipse cx="86" cy="77" rx="7" ry="4.5" fill="#FF8FA3" opacity=".55"/>
+        ${mouth}${extra}
+      </g></svg>`;
+  }
+  function paint(el, mood){ if (mood) el.dataset.m = mood; el.innerHTML = mascot(el.dataset.color, el.dataset.m); }
+  $$('[data-m]').forEach(el => paint(el));
+  const rider = $('#rider');
+  if (rider) rider.innerHTML = mascot('#E9785A', 'happy', false).replace('<svg ', '<svg x="14" y="70" width="46" height="46" ');
+
+  /* ---------- markdown highlight for code blocks ---------- */
+  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const inl = s => s.replace(/`([^`]+)`/g,'<span class="t-c">`$1`</span>').replace(/\*\*([^*]+)\*\*/g,'<span class="t-strong">**$1**</span>');
+  function hl(text){
+    let fm = 0, inFm = false;
+    return text.split('\n').map(line => {
+      const e = esc(line);
+      if (line.trim() === '---'){ fm++; inFm = fm === 1; return '<span class="t-dash">---</span>'; }
+      if (inFm){
+        const m = e.match(/^(\s*)([\w-]+)(:)(.*)$/);
+        if (m) return m[1] + '<span class="t-key">' + m[2] + '</span>' + m[3] + m[4];
+        const l = e.match(/^(\s*-)(.*)$/);
+        return l ? '<span class="t-li">' + l[1] + '</span>' + l[2] : e;
+      }
+      if (/^#{1,6}\s/.test(line)) return '<span class="t-h">' + e + '</span>';
+      const li = e.match(/^(\s*(?:-|\d+\.))(\s.*)$/);
+      if (li) return '<span class="t-li">' + li[1] + '</span>' + inl(li[2]);
+      return inl(e);
+    }).join('\n');
+  }
+  $$('pre.hl').forEach(p => { p.innerHTML = hl(p.textContent); });
+
+  /* ---------- reveal on scroll ---------- */
+  const onceIO = (els, cb, opts) => {
+    if (!('IntersectionObserver' in window)) { els.forEach(cb); return; }
+    const io = new IntersectionObserver(ents => ents.forEach(en => { if (en.isIntersecting){ cb(en.target); io.unobserve(en.target); } }), opts || {threshold:.12});
+    els.forEach(el => io.observe(el));
+  };
+  onceIO($$('.reveal'), el => el.classList.add('in'));
+  const tree = $('#tree');
+  if (tree){ $$('div', tree).forEach((d,i) => d.style.transitionDelay = (i*90)+'ms'); onceIO([tree], el => el.classList.add('in')); }
+
+  /* ---------- progress + nav ---------- */
+  const bar = $('#progress');
+  const onScroll = () => { const h = document.documentElement; bar.style.width = (h.scrollTop / Math.max(1, h.scrollHeight - h.clientHeight) * 100) + '%'; };
+  addEventListener('scroll', onScroll, {passive:true}); onScroll();
+  const navLinks = $$('.topnav a'); const navWrap = $('.topnav .wrap');
+  if ('IntersectionObserver' in window){
+    const io = new IntersectionObserver(ents => ents.forEach(en => {
+      if (!en.isIntersecting) return;
+      navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + en.target.id));
+      const act = navLinks.find(a => a.classList.contains('active'));
+      if (act) navWrap.scrollTo({left: navWrap.scrollLeft + act.getBoundingClientRect().left - navWrap.getBoundingClientRect().left - 20, behavior: 'smooth'});
+    }), {rootMargin:'-45% 0px -50% 0px'});
+    $$('section.sec').forEach(s => io.observe(s));
+  }
+
+  /* ---------- S2: typing demo ---------- */
+  const SRC = "# Dự án Quản lý Freelancer\nỨng dụng giúp **quản lý cộng tác viên tự do**.\n\n## Quy tắc\n- Giao diện viết bằng tiếng Việt\n- Không sửa thư mục `core/`\n- Làm xong thì chụp màn hình";
+  function renderMd(src){
+    const out = []; let ul = false;
+    const f = s => s.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/`([^`]+)`/g,'<code>$1</code>');
+    src.split('\n').forEach(line => {
+      const e = esc(line);
+      if (/^- /.test(line)){ if (!ul){ out.push('<ul>'); ul = true; } out.push('<li>' + f(e.slice(2)) + '</li>'); return; }
+      if (ul){ out.push('</ul>'); ul = false; }
+      if (/^## /.test(line)) out.push('<h4>' + f(e.slice(3)) + '</h4>');
+      else if (/^# /.test(line)) out.push('<h3>' + f(e.slice(2)) + '</h3>');
+      else if (line.trim()) out.push('<p>' + f(e) + '</p>');
+    });
+    if (ul) out.push('</ul>');
+    return out.join('');
+  }
+  const tSrc = $('#typeSrc'), tOut = $('#typeOut');
+  if (tSrc){
+    const chars = Array.from(SRC);
+    const show = n => { const s = chars.slice(0, n).join(''); tSrc.innerHTML = hl(s); tOut.innerHTML = renderMd(s); };
+    if (REDUCED) show(chars.length);
+    else {
+      let visible = false, n = 0, started = false;
+      const tick = async () => {
+        while (true){
+          if (!visible){ await wait(300); continue; }
+          n++; show(n);
+          if (n >= chars.length){ await wait(3800); n = 0; show(0); await wait(500); }
+          else await wait(chars[n-1] === '\n' ? 260 : 38);
+        }
+      };
+      new IntersectionObserver(ents => { visible = ents[0].isIntersecting; if (visible && !started){ started = true; tick(); } }, {threshold:.25}).observe(tSrc);
+    }
+  }
+
+  /* ---------- S4: skill shelf ---------- */
+  const SK = {
+    'tao-trang-moi': ['Hỏi bạn: tên trang, trang hiển thị dữ liệu gì', 'Copy mẫu từ templates/trang-mau.tsx', 'Thêm trang vào menu bên trái', 'Chạy thử và chụp màn hình cho bạn xem'],
+    'kiem-thu': ['Đọc chức năng cần kiểm tra', 'Liệt kê tình huống: nhập đúng, nhập sai, bỏ trống', 'Viết và chạy bài kiểm tra tự động', 'Báo lại: bao nhiêu bài đạt, chỗ nào lỗi'],
+    'xuat-excel': ['Hỏi bạn cần những cột nào', 'Lấy dữ liệu từ hệ thống', 'Tạo file Excel theo mẫu của nhóm', 'Gửi file và báo số dòng đã xuất'],
+    'dich-chu': ['Tìm chữ cần đổi trong file ngôn ngữ', 'Sửa cả bản tiếng Việt và tiếng Anh', 'Kiểm tra chữ mới không bị tràn khung']
+  };
+  const shelf = $('#shelf'), think = $('#think'), opened = $('#opened'), reqRow = $('#reqRow');
+  let pickToken = 0;
+  async function pick(key, btn){
+    const my = ++pickToken;
+    $$('.btn', reqRow).forEach(b => b.classList.toggle('on', b === btn));
+    $$('.book', shelf).forEach(b => b.classList.remove('pick'));
+    opened.className = 'opened'; opened.innerHTML = '';
+    shelf.classList.add('choosing'); shelf.classList.remove('scan'); void shelf.offsetWidth; shelf.classList.add('scan');
+    think.textContent = 'Đang đọc nhãn từng cuốn…';
+    await wait(REDUCED ? 0 : 900); if (my !== pickToken) return;
+    if (key === 'none'){
+      shelf.classList.remove('choosing');
+      think.textContent = 'Không cuốn nào khớp — mình tự trả lời!';
+      opened.className = 'opened none show';
+      opened.innerHTML = '<b>Không phải việc nào cũng cần skill.</b> Với câu hỏi chung, Claude dùng năng lực sẵn có để làm — giống như bạn đạp xe trên con đường quen, chẳng cần bản đồ.';
+      return;
+    }
+    const book = $(`.book[data-skill="${key}"]`, shelf);
+    book.classList.add('pick');
+    think.innerHTML = `Khớp nhãn <b>${key}</b>! Mở sổ ra đọc…`;
+    await wait(REDUCED ? 0 : 500); if (my !== pickToken) return;
+    opened.className = 'opened show';
+    opened.innerHTML = `<b>Đang mở SKILL.md của <code>${key}</code></b> — làm theo từng bước:<ol>${SK[key].map((s,i) => `<li style="animation-delay:${i*.25}s">${s}</li>`).join('')}</ol>`;
+  }
+  if (reqRow){
+    $$('.btn', reqRow).forEach(b => b.addEventListener('click', () => pick(b.dataset.pick, b)));
+    onceIO([shelf], () => setTimeout(() => { if (!pickToken) pick('tao-trang-moi', $('.btn', reqRow)); }, 500), {threshold:.6});
+  }
+
+  /* ---------- S4: agent dispatch ---------- */
+  const dispatch = $('#dispatch'), dBtn = $('#dispatchBtn'), dStatus = $('#dispatchStatus'), bossPile = $('#bossPile');
+  const rooms = [$('#room1'), $('#room2')];
+  const ENV = '<svg width="36" height="26" viewBox="0 0 36 26"><rect x="1.5" y="1.5" width="33" height="23" rx="4" fill="#fff" stroke="#E9785A" stroke-width="2.5"/><path d="M3 4 L18 15 L33 4" fill="none" stroke="#E9785A" stroke-width="2.5" stroke-linejoin="round"/></svg>';
+  const ctr = (el) => { const r = el.getBoundingClientRect(), b = dispatch.getBoundingClientRect(); return {x: r.left - b.left + r.width/2, y: r.top - b.top + r.height/2}; };
+  function flyTo(node, from, to, dur){
+    node.classList.add('fly'); dispatch.appendChild(node);
+    const w = node.offsetWidth, h = node.offsetHeight;
+    const p = (x, y, s) => `translate(${x - w/2}px, ${y - h/2}px) scale(${s})`;
+    const mx = (from.x + to.x)/2, my = Math.min(from.y, to.y) - 50;
+    const a = node.animate([
+      {transform: p(from.x, from.y, .5), opacity: 0},
+      {transform: p(mx, my, 1.05), opacity: 1, offset: .5},
+      {transform: p(to.x, to.y, .9), opacity: 1}
+    ], {duration: REDUCED ? 1 : dur, easing: 'ease-in-out', fill: 'forwards'});
+    return a.finished.then(() => node.remove());
+  }
+  let dBusy = false;
+  async function runDispatch(){
+    if (dBusy) return; dBusy = true; dBtn.disabled = true;
+    bossPile.innerHTML = ''; rooms.forEach(r => { $('.room-pile', r).innerHTML = ''; });
+    dStatus.textContent = 'Claude chính chia việc cho 2 agent…';
+    const bossM = $('.boss .m', dispatch);
+    await Promise.all(rooms.map((r, i) => wait(i*220).then(() => { const env = document.createElement('div'); env.innerHTML = ENV; return flyTo(env, ctr(bossM), ctr($('.m', r)), 950); })));
+    rooms.forEach(r => r.classList.add('working'));
+    dStatus.textContent = 'Mỗi agent làm ở phòng riêng, bày tài liệu trên bàn riêng…';
+    for (let k = 0; k < 7; k++){ rooms.forEach(r => $('.room-pile', r).appendChild(document.createElement('i'))); await wait(REDUCED ? 0 : 280); }
+    await wait(REDUCED ? 0 : 500);
+    dStatus.textContent = 'Xong — bàn riêng được dọn đi, chỉ gửi về bản tóm tắt.';
+    const labels = ['code-reviewer: 2 lỗi chính tả nhỏ', 'tester: 12/12 bài kiểm tra đạt'];
+    await Promise.all(rooms.map((r, i) => {
+      r.classList.remove('working'); $('.room-pile', r).innerHTML = '';
+      const d = document.createElement('span'); d.className = 'doc'; d.style.setProperty('--c', i ? 'var(--lav)' : 'var(--mint)'); d.textContent = 'Tóm tắt';
+      return wait(i*200).then(() => flyTo(d, ctr($('.m', r)), ctr(bossPile), 950)).then(() => { const c = document.createElement('div'); c.className = 'chip'; c.textContent = labels[i]; bossPile.appendChild(c); });
+    }));
+    dStatus.textContent = 'Bàn của Claude chính chỉ nhận 2 dòng tóm tắt — vẫn gọn gàng!';
+    dBusy = false; dBtn.disabled = false; dBtn.textContent = 'Xem lại';
+  }
+  if (dispatch){
+    dBtn.addEventListener('click', runDispatch);
+    onceIO([dispatch], () => setTimeout(runDispatch, 400), {threshold:.6});
+  }
+
+  /* ---------- S5: session player ---------- */
+  const STEPS = [
+    {t:'Mở Claude Code', d:'Bạn mở Claude Code trong thư mục dự án. Claude "thức dậy" với cái bàn trống trơn, chưa biết gì về dự án.', add:[], mood:'sleep'},
+    {t:'Đọc sổ tay & nội quy', d:'Claude tự động đọc CLAUDE.md, các rule chung và sổ auto memory. "À, dự án quản lý freelancer, viết giao diện bằng tiếng Việt!"', add:[['CLAUDE.md','var(--coral)',8],['Rule chung','var(--sun)',4],['Auto memory','var(--pink)',2]], mood:'wow'},
+    {t:'Lướt nhãn trên kệ', d:'Claude lướt nhãn (name + description) của các skill và agent — chưa mở nội dung bên trong.', add:[['4 nhãn skill','var(--mint)',2],['2 nhãn agent','var(--lav)',1]]},
+    {t:'Bạn giao việc', d:'"Thêm trang Hợp đồng freelancer, có ô tìm kiếm."', add:[['Yêu cầu của bạn','var(--sky)',3]]},
+    {t:'Mở đúng sổ công thức', d:'Yêu cầu khớp nhãn của skill tao-trang-moi → Claude mở SKILL.md ra đọc kỹ từng bước.', add:[['SKILL.md · tao-trang-moi','var(--mint)',8]]},
+    {t:'Vào khu vực, gặp biển báo', d:'Claude mở các file trong src/pages/ → rule "Quy tắc giao diện" tự động hiện ra.', add:[['File trong src/pages','var(--sky)',14],['Rule giao diện','var(--sun)',4]]},
+    {t:'Xin phép rồi mới làm', d:'Claude trình bày kế hoạch và hỏi bạn trước khi sửa file hay chạy lệnh. Bạn đọc kỹ rồi mới đồng ý.', add:[['Kế hoạch + code mới','var(--coral)',16]]},
+    {t:'Nhờ đồng nghiệp soát lỗi', d:'Claude giao cho agent code-reviewer. Agent làm ở bàn riêng, chỉ gửi về bản tóm tắt ngắn.', add:[['Tóm tắt từ reviewer','var(--lav)',3]]},
+    {t:'Báo cáo cho bạn', d:'Claude báo lại: đã làm gì, kiểm tra ra sao, còn gì cần bạn quyết. Bạn mở ứng dụng lên xem thử.', add:[['Báo cáo','var(--coral)',3]]}
+  ];
+  const stepsEl = $('#steps');
+  if (stepsEl){
+    STEPS.forEach((s, i) => { const li = document.createElement('li'); li.textContent = s.t; li.addEventListener('click', () => { stop(); go(i); }); stepsEl.appendChild(li); });
+    const plM = $('#plM'), plTag = $('#plTag'), plTitle = $('#plTitle'), plText = $('#plText'), deskItems = $('#deskItems'), deskBar = $('#deskBar'), deskPct = $('#deskPct'), playBtn = $('#plPlay');
+    let cur = -1, timer = null;
+    function go(i){
+      const prev = cur; cur = Math.max(0, Math.min(STEPS.length - 1, i));
+      $$('li', stepsEl).forEach((li, k) => { li.classList.toggle('cur', k === cur); li.classList.toggle('done', k < cur); });
+      const s = STEPS[cur];
+      paint(plM, s.mood || 'happy');
+      plTag.textContent = `Bước ${cur+1}/${STEPS.length}`;
+      plTitle.textContent = s.t; plText.textContent = s.d;
+      const now = $('.pl-now', $('#player')); now.classList.remove('pl-anim'); void now.offsetWidth; now.classList.add('pl-anim');
+      deskItems.innerHTML = ''; let pct = 3;
+      STEPS.slice(0, cur + 1).forEach((st, k) => st.add.forEach(([lab, c, sz]) => {
+        pct += sz; const d = document.createElement('span'); d.className = 'doc' + (k === cur && cur > prev ? ' new' : ''); d.style.setProperty('--c', c); d.textContent = lab; deskItems.appendChild(d);
+      }));
+      if (!deskItems.children.length) deskItems.innerHTML = '<span class="empty">Bàn đang trống…</span>';
+      deskBar.style.width = pct + '%'; deskPct.textContent = pct + '%';
+      deskBar.className = pct > 80 ? 'hot' : pct > 55 ? 'warn' : '';
+    }
+    function stop(){ clearInterval(timer); timer = null; playBtn.textContent = 'Phát'; }
+    function play(){
+      if (cur >= STEPS.length - 1) go(0);
+      playBtn.textContent = 'Tạm dừng';
+      timer = setInterval(() => { if (cur >= STEPS.length - 1) { stop(); return; } go(cur + 1); }, 3600);
+    }
+    playBtn.addEventListener('click', () => timer ? stop() : play());
+    $('#plNext').addEventListener('click', () => { stop(); go(cur + 1); });
+    $('#plPrev').addEventListener('click', () => { stop(); go(cur - 1); });
+    $('#plReset').addEventListener('click', () => { stop(); go(0); play(); });
+    go(0);
+    if (!REDUCED) onceIO([$('#player')], () => setTimeout(play, 800), {threshold:.4});
+  }
+
+  /* ---------- S6: context desk ---------- */
+  const cDesk = $('#ctxDesk');
+  if (cDesk){
+    const cBar = $('#ctxBar'), cPct = $('#ctxPct'), cSay = $('#ctxSay'), cM = $('#ctxM');
+    let ctx = 0, mood = '';
+    function paper(type){
+      const p = document.createElement('div'); p.className = 'paper ' + (type || '');
+      const w = cDesk.clientWidth || 300;
+      p.style.left = (8 + Math.random() * Math.max(10, w - 70)) + 'px';
+      p.style.bottom = (6 + Math.random() * 74) + 'px';
+      p.style.rotate = (Math.random() * 26 - 13).toFixed(1) + 'deg';
+      cDesk.appendChild(p);
+    }
+    function update(msg){
+      ctx = Math.max(0, Math.min(100, ctx));
+      cBar.style.width = ctx + '%'; cPct.textContent = ctx + '%';
+      cBar.className = ctx > 80 ? 'hot' : ctx > 55 ? 'warn' : '';
+      const m = ctx > 80 ? 'sweat' : ctx > 55 ? 'wow' : 'happy';
+      if (m !== mood){ mood = m; paint(cM, m); }
+      cSay.textContent = msg || (ctx > 80 ? 'Bàn bừa quá, dễ sót ý!' : ctx > 55 ? 'Hơi nhiều giấy rồi nha…' : 'Bàn gọn, làm việc sướng!');
+    }
+    function reset(){ cDesk.innerHTML = ''; paper('p-md'); ctx = 12; }
+    async function add(n, type, inc){
+      if (ctx + inc > 96){
+        update('Bàn đầy! Mình tự gom gọn…'); await wait(900);
+        compact('Đã tự gom gọn — có thể sót vài chi tiết.'); return;
+      }
+      for (let i = 0; i < n; i++) paper(type);
+      ctx += inc; update();
+    }
+    function compact(msg){ const keep = Math.round((ctx - 12) * .25); cDesk.innerHTML = ''; paper('p-md'); paper('p-sum'); ctx = 12 + keep; update(msg || 'Gom thành 1 bản tóm tắt, gọn hẳn!'); }
+    $('#cFile').addEventListener('click', () => add(3, '', 12));
+    $('#cChat').addEventListener('click', () => add(2, 'p-chat', 7));
+    $('#cCompact').addEventListener('click', () => compact());
+    $('#cClear').addEventListener('click', () => { reset(); update('Bàn sạch! CLAUDE.md được đọc lại tự động.'); });
+    reset(); update();
+  }
+
+  /* ---------- S4b: permission modes ---------- */
+  const permTable = $('#permTable');
+  if (permTable){
+    const ROWS = ['Đọc, tìm hiểu file', 'Sửa file', 'Chạy lệnh', 'Việc rủi ro (xóa dữ liệu, gửi ra ngoài)'];
+    const L = {auto:'Tự làm', ask:'Hỏi bạn trước', no:'Không làm'};
+    const MODES = {
+      manual: {cells:[['auto'],['ask'],['ask'],['ask']], mood:'happy', h:'Manual — mặc định', d:'Claude chỉ tự đọc. Sửa file hay chạy lệnh đều hỏi bạn trước.', fit:'Khi mới bắt đầu, hoặc làm việc nhạy cảm.'},
+      edits:  {cells:[['auto'],['auto'],['ask','Hỏi (trừ lệnh tạo, chuyển file đơn giản)'],['ask']], mood:'happy', h:'Edit automatically', d:'Claude tự sửa file trong dự án, các lệnh khác vẫn hỏi.', fit:'Khi bạn đã quen và đang ngồi xem Claude làm.'},
+      plan:   {cells:[['auto'],['no','Chưa sửa — chỉ lên kế hoạch'],['no','Chỉ lệnh để xem, không thay đổi gì'],['no']], mood:'wow', h:'Plan — lên kế hoạch trước', d:'Claude đọc, tìm hiểu rồi trình bày kế hoạch. Bạn duyệt xong mới bắt đầu sửa.', fit:'Trước một thay đổi lớn. Gõ /plan để vào nhanh.'},
+      auto:   {cells:[['auto'],['auto'],['guard','Tự làm, có lớp kiểm tra ngầm'],['guard','Bị kiểm tra, chặn nếu nguy hiểm']], mood:'happy', h:'Auto', d:'Claude làm liền mạch, ít hỏi. Một lớp kiểm tra an toàn chạy ngầm sẽ chặn việc rủi ro.', fit:'Việc dài, khi tổ chức đã bật và team kỹ thuật đồng ý.'}
+    };
+    const note = $('#permNote');
+    function setMode(k){
+      const m = MODES[k];
+      $$('#permModes .btn').forEach(b => b.classList.toggle('on', b.dataset.mode === k));
+      permTable.innerHTML = ROWS.map((r, i) => { const [st, lab] = m.cells[i]; return `<div class="prow"><span>${r}</span><span class="st ${st}">${lab || L[st]}</span></div>`; }).join('');
+      note.innerHTML = `<div class="m" data-m="${m.mood}" data-color="#4AA3DF"></div><div><h4>${m.h}</h4><p>${m.d}</p><p class="small muted"><b>Hợp với:</b> ${m.fit}</p></div>`;
+      paint($('.m', note));
+    }
+    $$('#permModes .btn').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+    setMode('manual');
+  }
+
+  /* ---------- S10: flip cards ---------- */
+  $$('.flip').forEach(f => f.addEventListener('click', () => { const on = f.classList.toggle('on'); f.setAttribute('aria-pressed', on); }));
+})();
+</script>
+</body>
+</html>
